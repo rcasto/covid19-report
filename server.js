@@ -5,7 +5,9 @@ const util = require('util');
 const parsePromise = util.promisify(parse);
 
 const csvFileRegex = /.*\.csv$/;
-const covid19DailyReportsDirectoryUrl = 'https://api.github.com/repos/CSSEGISandData/COVID-19/contents/csse_covid_19_data/csse_covid_19_daily_reports';
+const covid19BaseUrl = 'https://api.github.com/repos/CSSEGISandData/COVID-19/contents';
+const covid19DailyReportsDirectoryUrl = `${covid19BaseUrl}/csse_covid_19_data/csse_covid_19_daily_reports`;
+const covid19ConfirmedReportsTimeSeriesUrl = `${covid19BaseUrl}/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv`;
 
 /*
     The format of the daily reports is as follows:
@@ -31,6 +33,16 @@ function getReportDate(reportName) {
     return new Date(year, month, day);
 }
 
+function fetchAndParseReport(reportUrl) {
+    return fetch(reportUrl)
+        .then(response => response.json())
+        .then(latestReportRecord => {
+            const latestReportContentBuffer = Buffer.from(latestReportRecord.content, latestReportRecord.encoding);
+            return latestReportContentBuffer.toString('utf8');
+        })
+        .then(parsePromise);
+}
+
 fetch(covid19DailyReportsDirectoryUrl)
     .then(response => response.json())
     .then(dailyReports =>
@@ -44,14 +56,15 @@ fetch(covid19DailyReportsDirectoryUrl)
         const report2Date = getReportDate(report2);
         return report2Date - report1Date;
     }))
-    .then(dailyReports => dailyReports[0])
-    .then(latestReport => `${covid19DailyReportsDirectoryUrl}/${latestReport}`)
-    .then(latestReportUrl => fetch(latestReportUrl))
-    .then(response => response.json())
-    .then(latestReportRecord => {
-        const latestReportContentBuffer = Buffer.from(latestReportRecord.content, latestReportRecord.encoding);
-        return latestReportContentBuffer.toString('utf8');
+    .then(dailyReports => {
+        if (dailyReports.length > 0) {
+            return dailyReports[0];
+        }
+        throw new Error('No daily reports found...hmmm');
     })
-    .then(parsePromise)
-    .then(parsedLatestReport => console.log(parsedLatestReport))
-    .catch(err => console.error(err));
+    .then(latestReport => `${covid19DailyReportsDirectoryUrl}/${latestReport}`)
+    .then(fetchAndParseReport)
+    .then(parsedLatestReport => {
+        console.log(parsedLatestReport);
+    })
+    .catch(console.error);
