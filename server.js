@@ -1,4 +1,8 @@
 const fetch = require('node-fetch');
+const parse = require('csv-parse');
+const util = require('util');
+
+const parsePromise = util.promisify(parse);
 
 const csvFileRegex = /.*\.csv$/;
 const covid19DailyReportsDirectoryUrl = 'https://api.github.com/repos/CSSEGISandData/COVID-19/contents/csse_covid_19_data/csse_covid_19_daily_reports';
@@ -40,5 +44,14 @@ fetch(covid19DailyReportsDirectoryUrl)
         const report2Date = getReportDate(report2);
         return report2Date - report1Date;
     }))
-    .then(dailyReports => console.log(dailyReports))
+    .then(dailyReports => dailyReports[0])
+    .then(latestReport => `${covid19DailyReportsDirectoryUrl}/${latestReport}`)
+    .then(latestReportUrl => fetch(latestReportUrl))
+    .then(response => response.json())
+    .then(latestReportRecord => {
+        const latestReportContentBuffer = Buffer.from(latestReportRecord.content, latestReportRecord.encoding);
+        return latestReportContentBuffer.toString('utf8');
+    })
+    .then(parsePromise)
+    .then(parsedLatestReport => console.log(parsedLatestReport))
     .catch(err => console.error(err));
