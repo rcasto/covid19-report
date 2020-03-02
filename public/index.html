@@ -3,16 +3,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COVID-19 Latest Report</title>
+    <style>
+        footer {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
 </head>
 <body>
     <header>
         <h1>COVID-19 Latest Report</h1>
     </header>
-    <main class="covid-19-report"></main>
+    <main class="covid19-report">
+        <div class="covid19-location-info">
+            <div>Lat:</div>
+            <div>Long:</div>
+            <button>Use my location to filter results</button>
+        </div>
+        <div class="covid19-data">Loading...</div>
+    </main>
     <footer>
+        <h2>Resources</h2>
         <a href="https://github.com/CSSEGISandData/COVID-19">COVID-19 (2019-nCoV) Data Repository by Johns Hopkins CSSE</a>
         <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6">Coronavirus COVID-19 Global Cases by Johns Hopkins CSSE (Desktop Visual Dashboard)</a>
         <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/85320e2ea5424dfaaa75ae62e5c06e61">Coronavirus COVID-19 Global Cases by Johns Hopkins CSSE (Mobile Visual Dashboard)</a>
     </footer>
+    <script>
+
+
+        fetch('/api/latest-report')
+            .then(response => response.json())
+            .then(latestReport => {
+                const table = document.createElement('table');
+
+                const tableHeaderRow = document.createElement('tr');
+                latestReport[0]
+                    .forEach(latestReportHeader => {
+                        const tableHeaderCell = document.createElement('th');
+                        tableHeaderCell.textContent = latestReportHeader;
+                        tableHeaderRow.appendChild(tableHeaderCell);
+                    });
+                table.appendChild(tableHeaderRow);
+
+                latestReport
+                    .slice(1)
+                    .forEach(latestReportRow => {
+                        const tableDataRow = document.createElement('tr');
+                        latestReportRow.forEach(latestReportCell => {
+                            const tableDataCell = document.createElement('td');
+                            tableDataCell.textContent = latestReportCell;
+                            tableDataRow.appendChild(tableDataCell);
+                        });
+                        table.appendChild(tableDataRow);
+                    });
+
+                const covid19DataElem = document.querySelector('.covid19-data');
+                covid19DataElem.innerHTML = '';
+                covid19DataElem.appendChild(table);
+            });
+    </script>
 </body>
 </html>

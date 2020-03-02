@@ -12,6 +12,7 @@
   "dependencies": {
     "csv-parse": "^4.8.6",
     "csv-stringify": "^5.3.6",
+    "express": "^4.17.1",
     "node-fetch": "^2.6.0"
   }
 }
