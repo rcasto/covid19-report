@@ -4,6 +4,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COVID-19 Latest Report</title>
     <style>
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+        main > * {
+            margin-bottom: 12px;
+        }
+        main *:last-child {
+            margin-bottom: 0;
+        }
+        .covid19-location-info {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid black;
+            padding: 12px;
+        }
+        .covid19-location-info .covid19-location-info-coords {
+            display: flex;
+            justify-content: space-evenly;
+            margin-bottom: 6px;
+        }
+        .covid19-data {
+            overflow-x: auto;
+        }
+        .covid19-data table {
+            text-align: left;
+            border-spacing: 6px;
+        }
+        .covid19-data table tr:nth-child(even) {
+            background-color: white;
+        }
+        .covid19-data table tr:nth-child(odd) {
+            background-color: whitesmoke;
+        }
+        .covid19-data table th, .covid19-data table td {
+            padding: 6px;
+        }
         footer {
             display: flex;
             flex-direction: column;
@@ -14,11 +50,13 @@
     <header>
         <h1>COVID-19 Latest Report</h1>
     </header>
-    <main class="covid19-report">
+    <main>
         <div class="covid19-location-info">
-            <div>Lat:</div>
-            <div>Long:</div>
-            <button>Use my location to filter results</button>
+            <div class="covid19-location-info-coords">
+                <span>Your Lat: <span id="location-lat">N/A</span></span>
+                <span>Your Long: <span id="location-long">N/A</span></span>
+            </div>
+            <button disabled id="location-button">Sort by nearest me</button>
         </div>
         <div class="covid19-data">Loading...</div>
     </main>
@@ -29,37 +67,102 @@
         <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/85320e2ea5424dfaaa75ae62e5c06e61">Coronavirus COVID-19 Global Cases by Johns Hopkins CSSE (Mobile Visual Dashboard)</a>
     </footer>
     <script>
+        let tableData;
 
+        const covid19DataElem = document.querySelector('.covid19-data');
+
+        const lat = document.getElementById('location-lat');
+        const long = document.getElementById('location-long');
+
+        const locationButton = document.getElementById('location-button');
+
+        if (navigator.geolocation) {
+            locationButton.addEventListener('click', () => {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    lat.textContent = pos.coords.latitude;
+                    long.textContent = pos.coords.longitude;
+
+                    renderTable(sortTableDataByLocation(tableData));
+                }, (err) => {
+                    console.error(err);
+
+                    lat.textContent = 'Error';
+                    long.textContent = 'Error';
+                });
+            });
+        }
+
+        function renderTable(tableData) {
+            const table = document.createElement('table');
+
+            const tableHeaderRow = document.createElement('tr');
+            tableData[0]
+                .forEach(tableHeader => {
+                    const tableHeaderCell = document.createElement('th');
+                    tableHeaderCell.textContent = tableHeader;
+                    tableHeaderRow.appendChild(tableHeaderCell);
+                });
+            table.appendChild(tableHeaderRow);
+
+            tableData
+                .slice(1)
+                .forEach(tableRow => {
+                    const tableDataRow = document.createElement('tr');
+                    tableRow.forEach(tableCell => {
+                        const tableDataCell = document.createElement('td');
+                        tableDataCell.textContent = tableCell;
+                        tableDataRow.appendChild(tableDataCell);
+                    });
+                    table.appendChild(tableDataRow);
+                });
+
+            covid19DataElem.innerHTML = '';
+            covid19DataElem.appendChild(table);
+        }
+
+        function sortTableDataByLocation(tableData, lat, long) {
+            table
+
+            const sortedTableData = tableData
+                .slice(1)
+                .sort((row1, row2) => {
+                    const [rowLat, rowLong]
+                });
+            
+            // add back header row
+            sortedTableData.unshift(tableData[0]);
+
+            return sortedTableData;
+        }
+
+        // https://stackoverflow.com/a/27943 - Haversine formula
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            var R = 6371; // Radius of the earth in km
+            var dLat = deg2rad(lat2-lat1);  // deg2rad below
+            var dLon = deg2rad(lon2-lon1); 
+            var a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2)
+                ; 
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            var d = R * c; // Distance in km
+            return d;
+        }
+        function deg2rad(deg) {
+            return deg * (Math.PI/180)
+        }
 
         fetch('/api/latest-report')
             .then(response => response.json())
             .then(latestReport => {
-                const table = document.createElement('table');
-
-                const tableHeaderRow = document.createElement('tr');
-                latestReport[0]
-                    .forEach(latestReportHeader => {
-                        const tableHeaderCell = document.createElement('th');
-                        tableHeaderCell.textContent = latestReportHeader;
-                        tableHeaderRow.appendChild(tableHeaderCell);
-                    });
-                table.appendChild(tableHeaderRow);
-
-                latestReport
-                    .slice(1)
-                    .forEach(latestReportRow => {
-                        const tableDataRow = document.createElement('tr');
-                        latestReportRow.forEach(latestReportCell => {
-                            const tableDataCell = document.createElement('td');
-                            tableDataCell.textContent = latestReportCell;
-                            tableDataRow.appendChild(tableDataCell);
-                        });
-                        table.appendChild(tableDataRow);
-                    });
-
-                const covid19DataElem = document.querySelector('.covid19-data');
-                covid19DataElem.innerHTML = '';
-                covid19DataElem.appendChild(table);
+                tableData = latestReport;
+                locationButton.disabled = false;
+                renderTable(latestReport);
+            })
+            .catch(err => {
+                console.error(err);
+                covid19DataElem.textContent = 'An error occurred, please refresh.';
             });
     </script>
 </body>
