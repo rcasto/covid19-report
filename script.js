@@ -89,7 +89,6 @@ fetch(covid19DailyReportsDirectoryUrl)
             const latestReportData = getColumns(parsedLatestReport, [
                 'Province/State',
                 'Country/Region',
-                'Last Update',
                 'Confirmed',
                 'Deaths',
                 'Recovered'
@@ -120,7 +119,6 @@ fetch(covid19DailyReportsDirectoryUrl)
             latestReportData.unshift([
                 'Province/State',
                 'Country/Region',
-                'Last Update',
                 'Confirmed',
                 'Deaths',
                 'Recovered',
