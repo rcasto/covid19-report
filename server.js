@@ -45,7 +45,7 @@ function initUpdateWorker() {
     // Runs once an hour
     cron.schedule(updateWorkerCronTab, () => {
         console.log('Fetching latest report');
-        
+
         fetchLatestReport()
             .then(async (latestReportString) => {
                 console.log('Fetched latest report');
@@ -71,6 +71,9 @@ app.use(helmet());
 app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.sendFile('index.html');
+});
+app.get('/favicon.ico', (req, res) => {
+    res.sendStatus(204);
 });
 app.get('/api/latest-report', async (req, res) => {
     res.json(latestReport.parsed);
