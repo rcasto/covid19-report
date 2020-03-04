@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COVID-19 Latest Report</title>
+    <title>COVID-19 Report</title>
     <style>
         *, *:before, *:after {
             box-sizing: border-box;
@@ -48,7 +48,7 @@
 </head>
 <body>
     <header>
-        <h1>COVID-19 Latest Report</h1>
+        <h1>COVID-19 Report</h1>
     </header>
     <main>
         <div class="covid19-location-info">
@@ -68,6 +68,12 @@
     </footer>
     <script>
         let tableData;
+
+        const h1Elem = document.querySelector('h1');
+        const titleElem = document.querySelector('title');
+        const currentDateString = (new Date()).toDateString();
+        h1Elem.textContent = `${h1Elem.textContent} - ${currentDateString}`;
+        titleElem.textContent = `${titleElem.textContent} - ${currentDateString}`;
 
         const covid19DataElem = document.querySelector('.covid19-data');
 
