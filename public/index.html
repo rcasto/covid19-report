@@ -131,7 +131,12 @@
                         parseFloat(tableRow[6], 10)
                     ];
                     const distance = getDistanceFromLatLonInMiles(rowLat, rowLong, lat, long);
-                    tableRow.push(distance);
+
+                    if (typeof tableRow[7] === 'number') {
+                        tableRow[7] = distance;
+                    } else {
+                        tableRow.push(distance);
+                    }
                 });
 
             const sortedTableData = tableData
@@ -141,7 +146,9 @@
                 });
             
             // add back header row, with additional 'Distance in miles' table header
-            sortedTableData.unshift([...tableData[0], 'Distance in miles']);
+            if (typeof tableData[7] !== 'string') {
+                sortedTableData.unshift([...tableData[0], 'Distance in miles']);
+            }
 
             return sortedTableData;
         }
