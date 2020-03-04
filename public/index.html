@@ -140,8 +140,8 @@
                     return row1[7] - row2[7];
                 });
             
-            // add back header row, with additional 'Distance' table header
-            sortedTableData.unshift([...tableData[0], 'Distance']);
+            // add back header row, with additional 'Distance in miles' table header
+            sortedTableData.unshift([...tableData[0], 'Distance in miles']);
 
             return sortedTableData;
         }
