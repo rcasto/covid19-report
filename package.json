@@ -4,11 +4,14 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "update": "node script.js"
+    "start": "node server.js"
   },
   "author": "Richie Casto (https://github.com/rcasto)",
   "license": "MIT",
+  "engines": {
+    "node": "12.x",
+    "npm": "6.x"
+  },
   "dependencies": {
     "csv-parse": "^4.8.8",
     "csv-stringify": "^5.3.6",
