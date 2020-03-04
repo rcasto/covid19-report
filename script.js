@@ -124,6 +124,5 @@ module.exports = function () {
 
             // Stringify CSV data and write/update latest on disk
             return stringifyPromise(latestReportData);
-        })
-        .catch(console.error);
+        });
 }
