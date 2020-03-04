@@ -17,6 +17,11 @@ let latestReport = {
     parsed: null,
 };
 
+// avoid logs in production, make it a no-op
+if (process.env.NODE_ENV === 'production') {
+    console.log = () => {};
+}
+
 async function readReport() {
     console.log('Reading report file from file system');
 
