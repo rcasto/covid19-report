@@ -2,18 +2,14 @@ const fetch = require('node-fetch');
 const parse = require('csv-parse');
 const stringify = require('csv-stringify');
 const util = require('util');
-const fs = require('fs');
 
 const parsePromise = util.promisify(parse);
 const stringifyPromise = util.promisify(stringify);
-const fsWriteAsync = util.promisify(fs.writeFile);
 
 const csvFileRegex = /.*\.csv$/;
 const covid19BaseUrl = 'https://api.github.com/repos/CSSEGISandData/COVID-19/contents';
 const covid19DailyReportsDirectoryUrl = `${covid19BaseUrl}/csse_covid_19_data/csse_covid_19_daily_reports`;
 const covid19ConfirmedReportsTimeSeriesUrl = `${covid19BaseUrl}/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv`;
-
-const covid19ReportOutputPath = 'covid19-report.csv';
 
 /*
     The format of the daily reports is as follows:
@@ -85,56 +81,49 @@ module.exports = function () {
         .then(latestReport => `${covid19DailyReportsDirectoryUrl}/${latestReport}`)
         .then(fetchAndParseReport)
         .then(async parsedLatestReport => {
-            try {
-                const timeSeriesReport = await fetchAndParseReport(covid19ConfirmedReportsTimeSeriesUrl);
-                const latestReportData = getColumns(parsedLatestReport, [
-                    'Province/State',
-                    'Country/Region',
-                    'Confirmed',
-                    'Deaths',
-                    'Recovered'
-                ]);
-                const timeSeriesData = getColumns(timeSeriesReport, [
-                    'Province/State',
-                    'Country/Region',
-                    'Lat',
-                    'Long'
-                ]);
+            const timeSeriesReport = await fetchAndParseReport(covid19ConfirmedReportsTimeSeriesUrl);
+            const latestReportData = getColumns(parsedLatestReport, [
+                'Province/State',
+                'Country/Region',
+                'Confirmed',
+                'Deaths',
+                'Recovered'
+            ]);
+            const timeSeriesData = getColumns(timeSeriesReport, [
+                'Province/State',
+                'Country/Region',
+                'Lat',
+                'Long'
+            ]);
 
-                // Build lookup map for location of province/country from time series data
-                // Will add this data to latest report entries
-                const provinceCountryToLocationMap = new Map();
-                timeSeriesData.forEach(timeSeriesEntry => {
-                    const [province, country, lat, long] = timeSeriesEntry;
-                    provinceCountryToLocationMap.set(`${province}-${country}`, [lat, long]);
-                });
+            // Build lookup map for location of province/country from time series data
+            // Will add this data to latest report entries
+            const provinceCountryToLocationMap = new Map();
+            timeSeriesData.forEach(timeSeriesEntry => {
+                const [province, country, lat, long] = timeSeriesEntry;
+                provinceCountryToLocationMap.set(`${province}-${country}`, [lat, long]);
+            });
 
-                // Add location info (lat, long) to all latest report entries
-                latestReportData.forEach(latestReportEntry => {
-                    const [province, country] = latestReportEntry;
-                    const location = provinceCountryToLocationMap.get(`${province}-${country}`);
-                    latestReportEntry.push.apply(latestReportEntry, location);
-                });
+            // Add location info (lat, long) to all latest report entries
+            latestReportData.forEach(latestReportEntry => {
+                const [province, country] = latestReportEntry;
+                const location = provinceCountryToLocationMap.get(`${province}-${country}`);
+                latestReportEntry.push.apply(latestReportEntry, location);
+            });
 
-                // Add new header row - Updated with Lat and Long
-                latestReportData.unshift([
-                    'Province/State',
-                    'Country/Region',
-                    'Confirmed',
-                    'Deaths',
-                    'Recovered',
-                    'Lat',
-                    'Long'
-                ]);
+            // Add new header row - Updated with Lat and Long
+            latestReportData.unshift([
+                'Province/State',
+                'Country/Region',
+                'Confirmed',
+                'Deaths',
+                'Recovered',
+                'Lat',
+                'Long'
+            ]);
 
-                // Stringify CSV data and write/update latest on disk
-                const latestReportCsvString = await stringifyPromise(latestReportData);
-                await fsWriteAsync(covid19ReportOutputPath, latestReportCsvString, {
-                    encoding: 'utf8',
-                });
-            } catch (err) {
-                console.error(err);
-            }
+            // Stringify CSV data and write/update latest on disk
+            return stringifyPromise(latestReportData);
         })
         .catch(console.error);
 }
