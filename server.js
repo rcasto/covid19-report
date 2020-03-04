@@ -43,29 +43,26 @@ function initUpdateWorker() {
     console.log('Initializing update worker');
 
     // Runs once an hour
-    cron.schedule(updateWorkerCronTab, async () => {
-        if (latestReport.raw) {
-            console.log('Fetching latest report');
-            fetchLatestReport()
-                .then(async (latestReportString) => {
-                    console.log('Fetched latest report');
+    cron.schedule(updateWorkerCronTab, () => {
+        console.log('Fetching latest report');
+        
+        fetchLatestReport()
+            .then(async (latestReportString) => {
+                console.log('Fetched latest report');
 
-                    if (latestReportString === latestReport.raw) {
-                        console.log('No report update');
-                        return;
-                    }
+                if (latestReportString === latestReport.raw) {
+                    console.log('No report update');
+                    return;
+                }
 
-                    console.log('Report updated, saved to disk');
+                console.log('Report updated, saved to disk');
 
-                    await fileWritePromise(covid19ReportOutputPath, latestReportString, {
-                        encoding: 'utf8',
-                    });
-                    await updateReport(latestReportString);
-                })
-                .catch(err => console.error(err));
-        } else {
-            await readReport();
-        }
+                await fileWritePromise(covid19ReportOutputPath, latestReportString, {
+                    encoding: 'utf8',
+                });
+                await updateReport(latestReportString);
+            })
+            .catch(err => console.error(err));
     });
 }
 
@@ -76,17 +73,22 @@ app.get('/', (req, res) => {
     res.sendFile('index.html');
 });
 app.get('/api/latest-report', async (req, res) => {
+    res.json(latestReport.parsed);
+});
+
+// Read the report file into memory
+// before starting the server
+async function initServer() {
     try {
-        if (!latestReport.raw) {
-            await readReport();
-        }
-        res.json(latestReport.parsed);
+        await readReport();
+        app.listen(port, () => {
+            console.log(`Server started on port ${port}`);
+            initUpdateWorker();
+        });
     } catch (err) {
-        res.status(500);
-        res.send(JSON.stringify(err));
+        console.error('Server not started, an error occurred.');
+        console.error(err);
     }
-});
-app.listen(port, () => {
-    console.log(`Server started on port ${port}`);
-    initUpdateWorker();
-});
+}
+
+initServer();
