@@ -10,7 +10,7 @@
   "author": "Richie Casto (https://github.com/rcasto)",
   "license": "MIT",
   "dependencies": {
-    "csv-parse": "^4.8.6",
+    "csv-parse": "^4.8.8",
     "csv-stringify": "^5.3.6",
     "express": "^4.17.1",
     "node-cron": "^2.0.3",
