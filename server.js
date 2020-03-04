@@ -35,7 +35,7 @@ function initUpdateWorker() {
     console.log('Initializing update worker');
 
     // Runs once an hour
-    cron.schedule('*/1 * * * *', async () => {
+    cron.schedule('*/5 * * * *', async () => {
         if (latestReport.raw) {
             console.log('Fetching latest report');
             fetchLatestReport()
