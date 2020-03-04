@@ -11,6 +11,7 @@ const parsePromise = util.promisify(parse);
 const fileReadPromise = util.promisify(fs.readFile);
 const fileWritePromise = util.promisify(fs.writeFile);
 
+const updateWorkerCronTab = '*/5 * * * *'; // every 5 minutes
 const covid19ReportOutputPath = 'covid19-report.csv';
 const port = process.env.PORT || 3000;
 const app = express();
@@ -42,7 +43,7 @@ function initUpdateWorker() {
     console.log('Initializing update worker');
 
     // Runs once an hour
-    cron.schedule('*/5 * * * *', async () => {
+    cron.schedule(updateWorkerCronTab, async () => {
         if (latestReport.raw) {
             console.log('Fetching latest report');
             fetchLatestReport()
