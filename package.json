@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "deploy": "gcloud config set project covid19-report && gcloud app deploy"
   },
   "author": "Richie Casto (https://github.com/rcasto)",
   "license": "MIT",
