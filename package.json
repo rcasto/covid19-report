@@ -14,9 +14,11 @@
     "npm": "6.x"
   },
   "dependencies": {
+    "compression": "^1.7.4",
     "csv-parse": "^4.8.8",
     "csv-stringify": "^5.3.6",
     "express": "^4.17.1",
+    "helmet": "^3.21.3",
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.0"
   }

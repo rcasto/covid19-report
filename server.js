@@ -3,6 +3,8 @@ const fs = require('fs');
 const util = require('util');
 const parse = require('csv-parse');
 const cron = require('node-cron');
+const helmet = require('helmet');
+const compression = require('compression');
 const fetchLatestReport = require('./script');
 
 const parsePromise = util.promisify(parse);
@@ -66,6 +68,8 @@ function initUpdateWorker() {
     });
 }
 
+app.use(compression());
+app.use(helmet());
 app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.sendFile('index.html');
