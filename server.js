@@ -7,10 +7,10 @@ const fetchLatestReportScript = require('./script');
 const httpsRedirect = require('./lib/httpsRedirect');
 const wwwToNonWwwRedirect = require('./lib/wwwToNonWwwRedirect');
 const rootRedirect = require('./lib/rootRedirect');
+const config = require('./config.json');
 
 const parsePromise = util.promisify(parse);
 
-const cronValidateHeaderName = 'X-Appengine-Cron';
 const port = process.env.PORT || 3000;
 const app = express();
 let latestReport = {
@@ -51,6 +51,7 @@ app.use(helmet());
 app.use(httpsRedirect);
 app.use(wwwToNonWwwRedirect);
 app.use(rootRedirect);
+app.use(express.json());
 app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.sendFile('index.html');
@@ -61,10 +62,10 @@ app.get('/favicon.ico', (req, res) => {
 app.get('/api/latest-report', async (req, res) => {
     res.json(latestReport.parsed);
 });
-app.get('/api/update-report', async (req, res) => {
-    const cronValidateHeader = req.get(cronValidateHeaderName);
-    if (!cronValidateHeader ||
-        cronValidateHeader !== 'true') {
+app.post('/api/update-report', async (req, res) => {
+    const cronId = req.body.cronId || '';
+    if (!cronId ||
+        cronId !== config.cronId) {
         res.sendStatus(400);
         return;
     }
