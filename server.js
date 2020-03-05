@@ -42,6 +42,25 @@ async function updateReport(updatedReportString) {
     latestReport.parsed = await parsePromise(updatedReportString);
 }
 
+function fetchAndWriteLatestReport() {
+    return fetchLatestReport()
+        .then(async (latestReportString) => {
+            console.log('Fetched latest report');
+
+            if (latestReportString === latestReport.raw) {
+                console.log('No report update');
+                return;
+            }
+
+            console.log('Report updated, saved to disk');
+
+            await fileWritePromise(covid19ReportOutputPath, latestReportString, {
+                encoding: 'utf8',
+            });
+            await updateReport(latestReportString);
+        });
+}
+
 function initUpdateWorker() {
     console.log('Initializing update worker');
 
@@ -49,23 +68,7 @@ function initUpdateWorker() {
     cron.schedule(updateWorkerCronTab, () => {
         console.log('Fetching latest report');
 
-        fetchLatestReport()
-            .then(async (latestReportString) => {
-                console.log('Fetched latest report');
-
-                if (latestReportString === latestReport.raw) {
-                    console.log('No report update');
-                    return;
-                }
-
-                console.log('Report updated, saved to disk');
-
-                await fileWritePromise(covid19ReportOutputPath, latestReportString, {
-                    encoding: 'utf8',
-                });
-                await updateReport(latestReportString);
-            })
-            .catch(err => console.error(err));
+        fetchAndWriteLatestReport();
     });
 }
 
@@ -84,6 +87,14 @@ app.get('/favicon.ico', (req, res) => {
 app.get('/api/latest-report', async (req, res) => {
     res.json(latestReport.parsed);
 });
+app.get('/api/update-report', async (req, res) => {
+    try {
+        await fetchAndWriteLatestReport();
+        res.sendStatus(200);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
 
 // Read the report file into memory
 // before starting the server
@@ -92,7 +103,7 @@ async function initServer() {
         await readReport();
         app.listen(port, () => {
             console.log(`Server started on port ${port}`);
-            initUpdateWorker();
+            // initUpdateWorker();
         });
     } catch (err) {
         console.error('Server not started, an error occurred.');
