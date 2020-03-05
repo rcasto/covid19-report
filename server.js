@@ -6,6 +6,9 @@ const cron = require('node-cron');
 const helmet = require('helmet');
 const compression = require('compression');
 const fetchLatestReport = require('./script');
+const httpsRedirect = require('./lib/httpsRedirect');
+const wwwToNonWwwRedirect = require('./lib/wwwToNonWwwRedirect');
+const rootRedirect = require('./lib/rootRedirect');
 
 const parsePromise = util.promisify(parse);
 const fileReadPromise = util.promisify(fs.readFile);
@@ -68,6 +71,9 @@ function initUpdateWorker() {
 
 app.use(compression());
 app.use(helmet());
+app.use(httpsRedirect);
+app.use(wwwToNonWwwRedirect);
+app.use(rootRedirect);
 app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.sendFile('index.html');
