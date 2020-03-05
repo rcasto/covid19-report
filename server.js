@@ -44,6 +44,8 @@ function fetchLatestReport() {
         });
 }
 
+app.enable("trust proxy");
+
 app.use(compression());
 app.use(helmet());
 app.use(httpsRedirect);
