@@ -61,7 +61,7 @@ app.get('/favicon.ico', (req, res) => {
 app.get('/api/latest-report', async (req, res) => {
     res.json(latestReport.parsed);
 });
-app.post('/api/update-report', async (req, res) => {
+app.get('/api/update-report', async (req, res) => {
     const cronId = req.query.cronId || '';
     if (!cronId ||
         cronId !== config.cronId) {
