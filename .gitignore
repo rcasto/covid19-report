@@ -1,3 +1,4 @@
 node_modules
 app.yaml
+cron.yaml
 .gcloudignore
