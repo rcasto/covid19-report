@@ -51,7 +51,6 @@ app.use(helmet());
 app.use(httpsRedirect);
 app.use(wwwToNonWwwRedirect);
 app.use(rootRedirect);
-app.use(express.json());
 app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.sendFile('index.html');
@@ -63,7 +62,7 @@ app.get('/api/latest-report', async (req, res) => {
     res.json(latestReport.parsed);
 });
 app.post('/api/update-report', async (req, res) => {
-    const cronId = req.body.cronId || '';
+    const cronId = req.query.cronId || '';
     if (!cronId ||
         cronId !== config.cronId) {
         res.sendStatus(400);
