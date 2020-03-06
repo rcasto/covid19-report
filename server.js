@@ -4,7 +4,7 @@ const parse = require('csv-parse');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require("express-rate-limit");
-const fetchLatestReportScript = require('./script');
+const fetchLatestReportWorker = require('./worker');
 const httpsRedirect = require('./lib/httpsRedirect');
 const wwwToNonWwwRedirect = require('./lib/wwwToNonWwwRedirect');
 const rootRedirect = require('./lib/rootRedirect');
@@ -35,7 +35,7 @@ async function updateReport(updatedReportString) {
 
 function fetchLatestReport() {
     console.log('Fetching latest report');
-    return fetchLatestReportScript()
+    return fetchLatestReportWorker()
         .then(async (latestReportString) => {
             console.log('Fetched latest report');
 
