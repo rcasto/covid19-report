@@ -1,20 +1,22 @@
 <script>
     const tableData = <%-JSON.stringify(latestReportWithLocation)%>;
+    const updateTimestamp = <%-JSON.stringify(lastUpdateTimestamp)%>;
     const reportTable = Array.prototype.slice.call(document.querySelectorAll('table'), 0)[1];
     const tableDataRows = 
         Array.prototype.slice.call(reportTable.querySelectorAll('tr'), 1);
 
     const h1Elem = document.querySelector('h1');
+    const lastUpdateElem = document.querySelector('.last-update-timestamp');
     const titleElem = document.querySelector('title');
     const currentDateString = (new Date()).toDateString();
 
     const lat = document.getElementById('location-lat');
     const long = document.getElementById('location-long');
-
     const locationButton = document.getElementById('location-button');
 
     h1Elem.textContent = `${h1Elem.textContent} - ${currentDateString}`;
     titleElem.textContent = `${titleElem.textContent} - ${currentDateString}`;
+    lastUpdateElem.textContent = (new Date(updateTimestamp)).toLocaleString();
 
     if (navigator.geolocation) {
         locationButton.disabled = false;
