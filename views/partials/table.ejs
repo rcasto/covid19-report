@@ -1,0 +1,4 @@
+<table>
+    <%- include('table.header.ejs', { tableHeader: tableData[0] }); %>
+    <%- include('table.data.ejs', { tableData: tableData.slice(1) }); %>
+</table>

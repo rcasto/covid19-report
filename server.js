@@ -61,7 +61,9 @@ app.use(express.static('public'));
 // only apply to rate limiter to requests that begin with /api/
 app.use('/api/', apiRateLimiter);
 app.get('/', (req, res) => {
-    res.render('index');
+    res.render('index', { 
+        latestReport: latestReport.parsed 
+    });
 });
 app.get('/favicon.ico', (req, res) => {
     res.sendStatus(204);
