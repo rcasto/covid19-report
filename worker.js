@@ -84,8 +84,8 @@ function generateTotalsData(reportData) {
 
     reportData.forEach(reportDataRow => {
         totalConfirmed += parseInt(reportDataRow[2], 10);
-        totalDeaths += parseInt(reportDataRow[2], 10);
-        totalRecovered += parseInt(reportDataRow[2], 10);
+        totalDeaths += parseInt(reportDataRow[3], 10);
+        totalRecovered += parseInt(reportDataRow[4], 10);
     });
 
     return [
