@@ -1,0 +1,147 @@
+<script>
+    let tableData;
+
+    const h1Elem = document.querySelector('h1');
+    const titleElem = document.querySelector('title');
+    const currentDateString = (new Date()).toDateString();
+    h1Elem.textContent = `${h1Elem.textContent} - ${currentDateString}`;
+    titleElem.textContent = `${titleElem.textContent} - ${currentDateString}`;
+
+    const covid19DataElem = document.querySelector('.covid19-data');
+
+    const lat = document.getElementById('location-lat');
+    const long = document.getElementById('location-long');
+
+    const locationButton = document.getElementById('location-button');
+
+    if (navigator.geolocation) {
+        locationButton.addEventListener('click', () => {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const { latitude, longitude } = pos.coords;
+
+                lat.textContent = latitude;
+                long.textContent = longitude;
+
+                renderTable(sortTableDataByLocation(tableData, latitude, longitude));
+            }, (err) => {
+                console.error(err);
+
+                lat.textContent = 'Error';
+                long.textContent = 'Error';
+            });
+        });
+    }
+
+    function renderTable(tableData) {
+        const table = document.createElement('table');
+
+        const tableHeaderRow = document.createElement('tr');
+        tableData[0]
+            .forEach(tableHeader => {
+                const tableHeaderCell = document.createElement('th');
+                tableHeaderCell.textContent = tableHeader;
+                tableHeaderRow.appendChild(tableHeaderCell);
+            });
+        table.appendChild(tableHeaderRow);
+
+        let totalConfirmed = 0;
+        let totalDeaths = 0;
+        let totalRecovered = 0;
+
+        tableData
+            .slice(1)
+            .forEach(tableRow => {
+                totalConfirmed += parseInt(tableRow[2], 10);
+                totalDeaths += parseInt(tableRow[3], 10);
+                totalRecovered += parseInt(tableRow[4], 10);
+
+                const tableDataRow = document.createElement('tr');
+                tableRow.forEach(tableCell => {
+                    const tableDataCell = document.createElement('td');
+                    tableDataCell.textContent = tableCell;
+                    tableDataRow.appendChild(tableDataCell);
+                });
+                table.appendChild(tableDataRow);
+            });
+
+        const totalsTable = document.createElement('table');
+        const totalsTableHeaderRow = document.createElement('tr');
+        ["Total Confirmed", "Total Deaths", "Total Recovered"]
+            .forEach(tableHeader => {
+                const tableHeaderCell = document.createElement('th');
+                tableHeaderCell.textContent = tableHeader;
+                totalsTableHeaderRow.appendChild(tableHeaderCell);
+            });
+        const totalsTableDataRow = document.createElement('tr');
+        [totalConfirmed, totalDeaths, totalRecovered]
+            .forEach(tableRow => {
+                const tableDataCell = document.createElement('td');
+                tableDataCell.textContent = tableRow;
+                totalsTableDataRow.appendChild(tableDataCell);
+            });
+        totalsTable.appendChild(totalsTableHeaderRow);
+        totalsTable.appendChild(totalsTableDataRow);
+
+        covid19DataElem.innerHTML = '';
+        covid19DataElem.appendChild(totalsTable);
+        covid19DataElem.appendChild(table);
+    }
+
+    function sortTableDataByLocation(tableData, lat, long) {
+        tableData
+            .slice(1)
+            .forEach(tableRow => {
+                const [rowLat, rowLong] = [
+                    parseFloat(tableRow[5], 10),
+                    parseFloat(tableRow[6], 10)
+                ];
+                const distance = getDistanceFromLatLonInMiles(rowLat, rowLong, lat, long);
+
+                if (typeof tableRow[7] === 'number') {
+                    tableRow[7] = distance;
+                } else {
+                    tableRow.push(distance);
+                }
+            });
+
+        const sortedTableData = tableData
+            .slice(1)
+            .sort((row1, row2) => {
+                return row1[7] - row2[7];
+            });
+        
+        // add back header row, with additional 'Distance in miles' table header
+        if (typeof tableData[7] !== 'string') {
+            sortedTableData.unshift([...tableData[0], 'Distance in miles']);
+        }
+
+        return sortedTableData;
+    }
+
+    // https://stackoverflow.com/a/27943 - Haversine formula
+    const R = 6371 * 0.6213712; // Radius of the earth in miles
+    const radianDegreeRatio = Math.PI / 180;
+    function getDistanceFromLatLonInMiles(lat1, lon1, lat2, lon2) {
+        const dLat = (lat2 - lat1) * radianDegreeRatio;
+        const dLon = (lon2 - lon1) * radianDegreeRatio; 
+        const a = 
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * radianDegreeRatio) * Math.cos(lat2 * radianDegreeRatio) * 
+            Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+        const d = R * c; // Distance in miles
+        return d;
+    }
+
+    fetch('/api/latest-report')
+        .then(response => response.json())
+        .then(latestReport => {
+            tableData = latestReport;
+            locationButton.disabled = false;
+            renderTable(latestReport);
+        })
+        .catch(err => {
+            console.error(err);
+            covid19DataElem.textContent = 'An error occurred, please refresh.';
+        });
+</script>

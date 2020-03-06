@@ -49,7 +49,8 @@ function fetchLatestReport() {
         });
 }
 
-app.enable("trust proxy");
+app.set('view engine', 'ejs');
+app.enable('trust proxy');
 
 app.use(compression());
 app.use(helmet());
@@ -60,7 +61,7 @@ app.use(express.static('public'));
 // only apply to rate limiter to requests that begin with /api/
 app.use('/api/', apiRateLimiter);
 app.get('/', (req, res) => {
-    res.sendFile('index.html');
+    res.render('index');
 });
 app.get('/favicon.ico', (req, res) => {
     res.sendStatus(204);

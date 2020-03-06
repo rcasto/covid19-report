@@ -1,0 +1,54 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19 Report</title>
+    <style>
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+        main > * {
+            margin-bottom: 12px;
+        }
+        main *:last-child {
+            margin-bottom: 0;
+        }
+        .covid19-location-info {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid black;
+            padding: 12px;
+        }
+        .covid19-location-info .covid19-location-info-coords {
+            display: flex;
+            justify-content: space-evenly;
+            margin-bottom: 6px;
+        }
+        .covid19-data table {
+            position: relative;
+            text-align: left;
+            border-spacing: 6px;
+            margin-bottom: 12px;
+        }
+        .covid19-data table:last-child {
+            margin-bottom: 0;
+        }
+        .covid19-data table th {
+            background-color: whitesmoke;
+            position: sticky;
+            top: 0;
+        }
+        .covid19-data table tr:nth-child(even) {
+            background-color: white;
+        }
+        .covid19-data table tr:nth-child(odd) {
+            background-color: whitesmoke;
+        }
+        .covid19-data table th, .covid19-data table td {
+            padding: 6px;
+        }
+        footer {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
