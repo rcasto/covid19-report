@@ -28,6 +28,10 @@
             position: relative;
             text-align: left;
             border-spacing: 6px;
+            margin-bottom: 12px;
+        }
+        .covid19-data table:last-child {
+            margin-bottom: 0;
         }
         .covid19-data table th {
             background-color: whitesmoke;
@@ -115,9 +119,17 @@
                 });
             table.appendChild(tableHeaderRow);
 
+            let totalConfirmed = 0;
+            let totalDeaths = 0;
+            let totalRecovered = 0;
+
             tableData
                 .slice(1)
                 .forEach(tableRow => {
+                    totalConfirmed += parseInt(tableRow[2], 10);
+                    totalDeaths += parseInt(tableRow[3], 10);
+                    totalRecovered += parseInt(tableRow[4], 10);
+
                     const tableDataRow = document.createElement('tr');
                     tableRow.forEach(tableCell => {
                         const tableDataCell = document.createElement('td');
@@ -127,7 +139,26 @@
                     table.appendChild(tableDataRow);
                 });
 
+            const totalsTable = document.createElement('table');
+            const totalsTableHeaderRow = document.createElement('tr');
+            ["Total Confirmed", "Total Deaths", "Total Recovered"]
+                .forEach(tableHeader => {
+                    const tableHeaderCell = document.createElement('th');
+                    tableHeaderCell.textContent = tableHeader;
+                    totalsTableHeaderRow.appendChild(tableHeaderCell);
+                });
+            const totalsTableDataRow = document.createElement('tr');
+            [totalConfirmed, totalDeaths, totalRecovered]
+                .forEach(tableRow => {
+                    const tableDataCell = document.createElement('td');
+                    tableDataCell.textContent = tableRow;
+                    totalsTableDataRow.appendChild(tableDataCell);
+                });
+            totalsTable.appendChild(totalsTableHeaderRow);
+            totalsTable.appendChild(totalsTableDataRow);
+
             covid19DataElem.innerHTML = '';
+            covid19DataElem.appendChild(totalsTable);
             covid19DataElem.appendChild(table);
         }
 
