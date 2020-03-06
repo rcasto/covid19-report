@@ -32,7 +32,7 @@ function fetchLatestReport() {
     return fetchLatestReportWorker()
         .then(async (latestReportData) => {
             console.log('Fetched latest report');
-
+            
             if (latestReportData.raw === latestReport.raw) {
                 console.log('Report the same, no update');
                 return;
@@ -70,8 +70,7 @@ app.get('/api/latest-report', async (req, res) => {
 });
 app.get('/api/update-report', async (req, res) => {
     const cronId = req.query.cronId || '';
-    if (!cronId ||
-        cronId !== config.cronId) {
+    if (cronId !== config.cronId) {
         res.sendStatus(400);
         return;
     }
