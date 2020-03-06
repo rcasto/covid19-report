@@ -18,6 +18,7 @@
     "csv-parse": "^4.8.8",
     "csv-stringify": "^5.3.6",
     "express": "^4.17.1",
+    "express-rate-limit": "^5.1.1",
     "helmet": "^3.21.3",
     "node-fetch": "^2.6.0"
   }

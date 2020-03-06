@@ -3,6 +3,7 @@ const util = require('util');
 const parse = require('csv-parse');
 const helmet = require('helmet');
 const compression = require('compression');
+const rateLimit = require("express-rate-limit");
 const fetchLatestReportScript = require('./script');
 const httpsRedirect = require('./lib/httpsRedirect');
 const wwwToNonWwwRedirect = require('./lib/wwwToNonWwwRedirect');
@@ -12,6 +13,10 @@ const config = require('./config.json');
 const parsePromise = util.promisify(parse);
 
 const port = process.env.PORT || 3000;
+const apiRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 150 // limit each IP to 150 requests per windowMs
+});
 const app = express();
 let latestReport = {
     raw: null,
@@ -52,6 +57,8 @@ app.use(httpsRedirect);
 app.use(wwwToNonWwwRedirect);
 app.use(rootRedirect);
 app.use(express.static('public'));
+// only apply to rate limiter to requests that begin with /api/
+app.use('/api/', apiRateLimiter);
 app.get('/', (req, res) => {
     res.sendFile('index.html');
 });
