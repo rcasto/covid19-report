@@ -19,6 +19,7 @@ let latestReport = {
     parsedNoLocation: null,
     parsed: null,
     totals: null,
+    lastUpdateTimestamp: null,
 };
 
 // avoid logs in production, make it a no-op
@@ -58,6 +59,7 @@ app.get('/', (req, res) => {
         latestReport: latestReport.parsedNoLocation,
         latestReportWithLocation: latestReport.parsed,
         totalsReport: latestReport.totals,
+        lastUpdateTimestamp: latestReport.lastUpdateTimestamp,
     });
 });
 app.get('/favicon.ico', (req, res) => {

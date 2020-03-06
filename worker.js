@@ -149,6 +149,7 @@ module.exports = function () {
                     ...getColumns(latestReportData, coreTableHeaders)
                 ],
                 totals: totalsData,
+                lastUpdateTimestamp: Date.now(),
             };
         });
 }
