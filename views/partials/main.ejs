@@ -4,9 +4,10 @@
             <span>Your Lat: <span id="location-lat">N/A</span></span>
             <span>Your Long: <span id="location-long">N/A</span></span>
         </div>
-        <button id="location-button">Sort by nearest me</button>
+        <button disabled id="location-button">Sort by nearest me</button>
     </div>
     <div class="covid19-data">
+        <%- include('table.ejs', { tableData: totalsReport }); %>
         <%- include('table.ejs', { tableData: latestReport }); %>
     </div>
 </main>

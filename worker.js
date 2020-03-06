@@ -11,6 +11,25 @@ const covid19BaseUrl = 'https://api.github.com/repos/CSSEGISandData/COVID-19/con
 const covid19DailyReportsDirectoryUrl = `${covid19BaseUrl}/csse_covid_19_data/csse_covid_19_daily_reports`;
 const covid19ConfirmedReportsTimeSeriesUrl = `${covid19BaseUrl}/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv`;
 
+const coreTableHeaders = [
+    'Province/State',
+    'Country/Region',
+    'Confirmed',
+    'Deaths',
+    'Recovered'
+];
+const coreTableHeadersWithLocation = [
+    ...coreTableHeaders,
+    'Lat',
+    'Long'
+];
+const timeSeriesTableHeaders = [
+    'Province/State',
+    'Country/Region',
+    'Lat',
+    'Long'
+];
+
 /*
     The format of the daily reports is as follows:
     MM-DD-YYYY.csv, ex) 01-22-2020.csv
@@ -58,6 +77,23 @@ function getColumns(data, columns) {
             .reduce((dataCols, col) => dataCols.concat(dataRow[col]), []));
 }
 
+function generateTotalsData(reportData) {
+    let totalConfirmed = 0;
+    let totalDeaths = 0;
+    let totalRecovered = 0;
+
+    reportData.forEach(reportDataRow => {
+        totalConfirmed += parseInt(reportDataRow[2], 10);
+        totalDeaths += parseInt(reportDataRow[2], 10);
+        totalRecovered += parseInt(reportDataRow[2], 10);
+    });
+
+    return [
+        ['Total Confirmed', 'Total Deaths', 'Total Recovered'],
+        [totalConfirmed, totalDeaths, totalRecovered]
+    ];
+}
+
 module.exports = function () {
     return fetch(covid19DailyReportsDirectoryUrl)
         .then(response => response.json())
@@ -82,19 +118,8 @@ module.exports = function () {
         .then(fetchAndParseReport)
         .then(async parsedLatestReport => {
             const timeSeriesReport = await fetchAndParseReport(covid19ConfirmedReportsTimeSeriesUrl);
-            const latestReportData = getColumns(parsedLatestReport, [
-                'Province/State',
-                'Country/Region',
-                'Confirmed',
-                'Deaths',
-                'Recovered'
-            ]);
-            const timeSeriesData = getColumns(timeSeriesReport, [
-                'Province/State',
-                'Country/Region',
-                'Lat',
-                'Long'
-            ]);
+            const latestReportData = getColumns(parsedLatestReport, coreTableHeaders);
+            const timeSeriesData = getColumns(timeSeriesReport, timeSeriesTableHeaders);
 
             // Build lookup map for location of province/country from time series data
             // Will add this data to latest report entries
@@ -111,18 +136,19 @@ module.exports = function () {
                 latestReportEntry.push.apply(latestReportEntry, location);
             });
 
-            // Add new header row - Updated with Lat and Long
-            latestReportData.unshift([
-                'Province/State',
-                'Country/Region',
-                'Confirmed',
-                'Deaths',
-                'Recovered',
-                'Lat',
-                'Long'
-            ]);
+            const totalsData = generateTotalsData(latestReportData);
 
-            // Stringify CSV data and write/update latest on disk
-            return stringifyPromise(latestReportData);
+            // Add new header row - Updated with Lat and Long
+            latestReportData.unshift(coreTableHeadersWithLocation);
+
+            return {
+                parsed: latestReportData,
+                raw: stringifyPromise(latestReportData),
+                parsedNoLocation: [
+                    coreTableHeaders,
+                    ...getColumns(latestReportData, coreTableHeaders)
+                ],
+                totals: totalsData,
+            };
         });
 }

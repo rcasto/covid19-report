@@ -1,6 +1,4 @@
 const express = require('express');
-const util = require('util');
-const parse = require('csv-parse');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require("express-rate-limit");
@@ -10,8 +8,6 @@ const wwwToNonWwwRedirect = require('./lib/wwwToNonWwwRedirect');
 const rootRedirect = require('./lib/rootRedirect');
 const config = require('./config.json');
 
-const parsePromise = util.promisify(parse);
-
 const port = process.env.PORT || 3000;
 const apiRateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -20,7 +16,9 @@ const apiRateLimiter = rateLimit({
 const app = express();
 let latestReport = {
     raw: null,
+    parsedNoLocation: null,
     parsed: null,
+    totals: null,
 };
 
 // avoid logs in production, make it a no-op
@@ -28,24 +26,19 @@ if (process.env.NODE_ENV === 'production') {
     console.log = () => {};
 }
 
-async function updateReport(updatedReportString) {
-    latestReport.raw = updatedReportString;
-    latestReport.parsed = await parsePromise(updatedReportString);
-}
-
 function fetchLatestReport() {
     console.log('Fetching latest report');
     return fetchLatestReportWorker()
-        .then(async (latestReportString) => {
+        .then(async (latestReportData) => {
             console.log('Fetched latest report');
 
-            if (latestReportString === latestReport.raw) {
+            if (latestReportData.raw === latestReport.raw) {
                 console.log('Report the same, no update');
                 return;
             }
 
             console.log('Report updated');
-            await updateReport(latestReportString);
+            latestReport = latestReportData;
         });
 }
 
@@ -62,7 +55,9 @@ app.use(express.static('public'));
 app.use('/api/', apiRateLimiter);
 app.get('/', (req, res) => {
     res.render('index', { 
-        latestReport: latestReport.parsed 
+        latestReport: latestReport.parsedNoLocation,
+        latestReportWithLocation: latestReport.parsed,
+        totalsReport: latestReport.totals,
     });
 });
 app.get('/favicon.ico', (req, res) => {

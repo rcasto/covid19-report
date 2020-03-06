@@ -1,22 +1,32 @@
 <script>
+    const tableData = <%-JSON.stringify(latestReportWithLocation)%>;
+    const reportTable = Array.prototype.slice.call(document.querySelectorAll('table'), 0)[1];
+    const tableDataRows = 
+        Array.prototype.slice.call(reportTable.querySelectorAll('tr'), 1);
+
     const h1Elem = document.querySelector('h1');
     const titleElem = document.querySelector('title');
     const currentDateString = (new Date()).toDateString();
-    h1Elem.textContent = `${h1Elem.textContent} - ${currentDateString}`;
-    titleElem.textContent = `${titleElem.textContent} - ${currentDateString}`;
 
     const lat = document.getElementById('location-lat');
     const long = document.getElementById('location-long');
 
     const locationButton = document.getElementById('location-button');
 
+    h1Elem.textContent = `${h1Elem.textContent} - ${currentDateString}`;
+    titleElem.textContent = `${titleElem.textContent} - ${currentDateString}`;
+
     if (navigator.geolocation) {
+        locationButton.disabled = false;
+
         locationButton.addEventListener('click', () => {
             navigator.geolocation.getCurrentPosition((pos) => {
                 const { latitude, longitude } = pos.coords;
 
                 lat.textContent = latitude;
                 long.textContent = longitude;
+
+                sortTableDataByLocation(tableData, latitude, longitude);
             }, (err) => {
                 console.error(err);
 
@@ -49,12 +59,14 @@
                 return row1[7] - row2[7];
             });
         
-        // add back header row, with additional 'Distance in miles' table header
-        if (typeof tableData[7] !== 'string') {
-            sortedTableData.unshift([...tableData[0], 'Distance in miles']);
-        }
-
-        return sortedTableData;
+        tableDataRows
+            .forEach((tableDataRow, tableDataRowIndex) => {
+                const sortedTableRow = sortedTableData[tableDataRowIndex];
+                const tableDataRowCells = Array.prototype.slice.call(tableDataRow.querySelectorAll('td'));
+                tableDataRowCells.forEach((tableDataRowCell, tableDataRowCellIndex) => {
+                    tableDataRowCell.textContent = sortedTableRow[tableDataRowCellIndex];
+                });
+            });
     }
 
     // https://stackoverflow.com/a/27943 - Haversine formula
