@@ -143,7 +143,7 @@ module.exports = function () {
 
             return {
                 parsed: latestReportData,
-                raw: stringifyPromise(latestReportData),
+                raw: await stringifyPromise(latestReportData),
                 parsedNoLocation: [
                     coreTableHeaders,
                     ...getColumns(latestReportData, coreTableHeaders)
