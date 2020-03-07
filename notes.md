@@ -1,0 +1,4 @@
+- Add deltas in data between last report and current report
+- Add light/dark mode toggle
+    - Default to user set theme
+    - Persist choice to local storage
