@@ -2,3 +2,4 @@ node_modules
 app.yaml
 .gcloudignore
 config.json
+covid19-report*

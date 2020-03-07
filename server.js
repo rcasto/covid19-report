@@ -6,6 +6,7 @@ const fetchLatestReportWorker = require('./worker');
 const httpsRedirect = require('./lib/httpsRedirect');
 const wwwToNonWwwRedirect = require('./lib/wwwToNonWwwRedirect');
 const rootRedirect = require('./lib/rootRedirect');
+const storage = require('./lib/storage');
 const config = require('./config.json');
 
 const port = process.env.PORT || 3000;
@@ -39,7 +40,9 @@ function fetchLatestReport() {
             }
 
             console.log('Report updated');
+            
             latestReport = latestReportData;
+            await storage.setReport(latestReport);
         });
 }
 
@@ -87,7 +90,7 @@ app.get('/api/update-report', async (req, res) => {
 // before starting the server
 async function initServer() {
     try {
-        await fetchLatestReport();
+        latestReport = await storage.getReport();
         app.listen(port, () => {
             console.log(`Server started on port ${port}`);
         });
