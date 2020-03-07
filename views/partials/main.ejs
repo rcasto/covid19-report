@@ -1,14 +1,25 @@
 <main>
     <a href="/api/latest-report" download="covid19-latest-report.json">Download latest report</a>
-    <div class="covid19-location-info">
-        <div class="covid19-location-info-coords">
-            <span>Your Lat: <span id="location-lat">N/A</span></span>
-            <span>Your Long: <span id="location-long">N/A</span></span>
-        </div>
-        <button disabled id="location-button">Sort by nearest me</button>
-    </div>
     <div class="covid19-data">
         <%- include('table.ejs', { tableData: totalsReport }); %>
-        <%- include('table.ejs', { tableData: latestReport }); %>
+        <div>
+            <div class="covid19-location-info">
+                <button
+                    title="Sort by confirmed case counts"
+                    aria-label="Sort by confirmed case counts">&check;</button>
+                <button
+                    title="Sort by death counts"
+                    aria-label="Sort by death counts">&#9904;</button>
+                <button
+                    title="Sort by recovered case counts"
+                    aria-label="Sort by recovered case counts">&#9877;</button>
+                <button
+                    disabled
+                    id="location-button"
+                    title="Sort by your location"
+                    aria-label="Sort by your location">&#9737;</button>
+            </div>
+            <%- include('table.ejs', { tableData: latestReport }); %>
+        </div>
     </div>
 </main>
