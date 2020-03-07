@@ -8,11 +8,26 @@
     const lastUpdateElem = document.querySelector('.last-update-timestamp');
     const currentDateString = (new Date()).toDateString();
 
-    const lat = document.getElementById('location-lat');
-    const long = document.getElementById('location-long');
+    const confirmedButton = document.getElementById('confirmed-button');
+    const deathsButton = document.getElementById('deaths-button');
+    const recoveredButton = document.getElementById('recovered-button');
     const locationButton = document.getElementById('location-button');
+    let activeButton = confirmedButton;
 
     lastUpdateElem.textContent = (new Date(updateTimestamp)).toLocaleString();
+
+    confirmedButton.addEventListener('click', () => {
+        sortTableDataByColumn(tableData, 2);
+        switchActiveSortButton(confirmedButton);
+    });
+    deathsButton.addEventListener('click', () => {
+        sortTableDataByColumn(tableData, 3);
+        switchActiveSortButton(deathsButton);
+    });
+    recoveredButton.addEventListener('click', () => {
+        sortTableDataByColumn(tableData, 4);
+        switchActiveSortButton(recoveredButton);
+    });
 
     if (navigator.geolocation) {
         locationButton.disabled = false;
@@ -20,18 +35,38 @@
         locationButton.addEventListener('click', () => {
             navigator.geolocation.getCurrentPosition((pos) => {
                 const { latitude, longitude } = pos.coords;
-
-                lat.textContent = latitude;
-                long.textContent = longitude;
-
                 sortTableDataByLocation(tableData, latitude, longitude);
+                switchActiveSortButton(locationButton);
             }, (err) => {
                 console.error(err);
-
-                lat.textContent = 'Error';
-                long.textContent = 'Error';
             });
         });
+    }
+
+    function switchActiveSortButton(newActiveSortButton) {
+        activeButton.classList.remove('covid19-active-sort');
+        newActiveSortButton.classList.add('covid19-active-sort');
+        activeButton = newActiveSortButton;
+    }
+
+    function sortTableDataByColumn(tableData, columnIndex, isAscending = false) {
+        const sortedTableData = tableData
+            .slice(1)
+            .sort((row1, row2) => {
+                if (isAscending) {
+                    return row1[columnIndex] - row2[columnIndex];
+                }
+                return row2[columnIndex] - row1[columnIndex];
+            });
+        
+        tableDataRows
+            .forEach((tableDataRow, tableDataRowIndex) => {
+                const sortedTableRow = sortedTableData[tableDataRowIndex];
+                const tableDataRowCells = Array.prototype.slice.call(tableDataRow.querySelectorAll('td'));
+                tableDataRowCells.forEach((tableDataRowCell, tableDataRowCellIndex) => {
+                    tableDataRowCell.textContent = sortedTableRow[tableDataRowCellIndex];
+                });
+            });
     }
 
     function sortTableDataByLocation(tableData, lat, long) {
@@ -51,20 +86,7 @@
                 }
             });
 
-        const sortedTableData = tableData
-            .slice(1)
-            .sort((row1, row2) => {
-                return row1[7] - row2[7];
-            });
-        
-        tableDataRows
-            .forEach((tableDataRow, tableDataRowIndex) => {
-                const sortedTableRow = sortedTableData[tableDataRowIndex];
-                const tableDataRowCells = Array.prototype.slice.call(tableDataRow.querySelectorAll('td'));
-                tableDataRowCells.forEach((tableDataRowCell, tableDataRowCellIndex) => {
-                    tableDataRowCell.textContent = sortedTableRow[tableDataRowCellIndex];
-                });
-            });
+        sortTableDataByColumn(tableData, 7, true);
     }
 
     // https://stackoverflow.com/a/27943 - Haversine formula

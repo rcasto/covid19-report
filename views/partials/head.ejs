@@ -22,16 +22,9 @@
         main *:last-child {
             margin-bottom: 0;
         }
+
         .covid19-latest-report-link {
             display: block;
-        }
-        .covid19-location-info {
-            display: flex;
-            padding: 12px;
-        }
-        .covid19-location-info button {
-            font-size: 24px;
-            width: 48px;
         }
 
         .covid19-data table {
@@ -39,9 +32,6 @@
             text-align: left;
             border-spacing: 6px;
             margin-bottom: 12px;
-        }
-        .covid19-data table:first-child {
-            float: right;
         }
         .covid19-data table:last-child {
             margin-bottom: 0;
@@ -59,6 +49,23 @@
         }
         .covid19-data table th, .covid19-data table td {
             padding: 6px;
+        }
+        .covid19-data .covid19-primary-data-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .covid19-data .covid19-primary-data-container .covid19-primary-data-sorts {
+            display: flex;
+        }
+        .covid19-data .covid19-primary-data-container .covid19-primary-data-sorts button {
+            font-size: 24px;
+            width: 48px;
+            opacity: 0.7;
+        }
+        .covid19-data .covid19-primary-data-container .covid19-primary-data-sorts button.covid19-active-sort {
+            color: blue;
+            border-color: blue;
+            opacity: 1;
         }
 
         footer {

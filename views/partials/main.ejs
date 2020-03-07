@@ -6,15 +6,19 @@
         rel="nofollow">Download latest report</a>
     <div class="covid19-data">
         <%- include('table.ejs', { tableData: totalsReport }); %>
-        <div>
-            <div class="covid19-location-info">
+        <div class="covid19-primary-data-container">
+            <div class="covid19-primary-data-sorts">
                 <button
+                    id="confirmed-button"
+                    class="covid19-active-sort"
                     title="Sort by confirmed case counts"
                     aria-label="Sort by confirmed case counts">&check;</button>
                 <button
+                    id="deaths-button"
                     title="Sort by death counts"
                     aria-label="Sort by death counts">&#9904;</button>
                 <button
+                    id="recovered-button"
                     title="Sort by recovered case counts"
                     aria-label="Sort by recovered case counts">&#9877;</button>
                 <button
