@@ -11,8 +11,8 @@ const config = require('./config.json');
 
 const port = process.env.PORT || 3000;
 const apiRateLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 150 // limit each IP to 150 requests per windowMs
+    windowMs: config.rateLimiter.windowMs,
+    max: config.rateLimiter.windowMax
 });
 const app = express();
 let latestReport = {
