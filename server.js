@@ -85,6 +85,9 @@ app.get('/api/update-report', async (req, res) => {
         res.status(500).send(err);
     }
 });
+app.get('*', (req, res) => {
+    res.redirect('/');
+});
 
 // Read the report file into memory
 // before starting the server
