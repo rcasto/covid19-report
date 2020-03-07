@@ -1,5 +1,9 @@
 <main>
-    <a href="/api/latest-report" download="covid19-latest-report.json">Download latest report</a>
+    <a
+        class="covid19-latest-report-link"
+        href="/api/latest-report"
+        download="covid19-latest-report.json"
+        rel="nofollow">Download latest report</a>
     <div class="covid19-data">
         <%- include('table.ejs', { tableData: totalsReport }); %>
         <div>

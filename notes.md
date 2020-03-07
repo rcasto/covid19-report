@@ -8,3 +8,7 @@
     - Sort by # of confirmed cases (default - checkmark)
     - Sort by # of deaths (-)
     - Sorty by # of recovered cases (+)
+
+- Add light/dark mode toggle
+    - Default to user set theme
+    - Persist choice to local storage
