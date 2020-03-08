@@ -112,7 +112,6 @@ function generateDeltasData(lastReportData, latestReportData) {
     const provinceRegionToLastCountsMap = new Map();
 
     lastReportData
-        .slice(1)
         .forEach(lastReportRow => {
             let [province, region, confirmedCount, deathCount, recoveredCount] = lastReportRow;
             confirmedCount = extractAndParseFloat(confirmedCount);
