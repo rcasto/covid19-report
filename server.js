@@ -9,8 +9,6 @@ const rootRedirect = require('./lib/rootRedirect');
 const storage = require('./lib/storage');
 const config = require('./config.json');
 
-const prevReport = require('./prevReport.json');
-
 const port = process.env.PORT || 3000;
 const apiRateLimiter = rateLimit({
     windowMs: config.rateLimiter.windowMs,
@@ -32,9 +30,7 @@ if (process.env.NODE_ENV === 'production') {
 
 function fetchLatestReport() {
     console.log('Fetching latest report');
-    return fetchLatestReportWorker({
-        parsed: prevReport
-    })
+    return fetchLatestReportWorker(latestReport)
         .then(async (latestReportData) => {
             console.log('Fetched latest report');
             
