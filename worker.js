@@ -180,6 +180,9 @@ module.exports = function (lastReport) {
                 getColumns(lastReport.parsed, coreTableHeaders) : [];
             const latestReportData = getColumns(parsedLatestReport, coreTableHeaders);
             const timeSeriesData = getColumns(timeSeriesReport, timeSeriesTableHeaders);
+            const rawReportData = await stringifyPromise(latestReportData);
+            const totalsData = generateTotalsData(lastReportTotalsData, latestReportData);
+            const deltasData = generateDeltasData(lastReportData, latestReportData);
 
             // Build lookup map for location of province/country from time series data
             // Will add this data to latest report entries
@@ -195,10 +198,6 @@ module.exports = function (lastReport) {
                 const location = provinceRegionToLocationMap.get(constructRowKey(province, region));
                 latestReportEntry.push.apply(latestReportEntry, location);
             });
-
-            const rawReportData = await stringifyPromise(latestReportData);
-            const totalsData = generateTotalsData(lastReportTotalsData, latestReportData);
-            const deltasData = generateDeltasData(lastReportData, latestReportData);
 
             // Add deltas info to latest report
             latestReportData
