@@ -42,7 +42,7 @@ function fetchLatestReport() {
             console.log('Report updated');
             
             latestReport = latestReportData;
-            // await storage.setReport(latestReport);
+            await storage.setReport(latestReport);
         });
 }
 
