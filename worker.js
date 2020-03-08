@@ -183,6 +183,7 @@ module.exports = function (lastReport) {
                 latestReportEntry.push.apply(latestReportEntry, location);
             });
 
+            const rawReportData = await stringifyPromise(latestReportData);
             const totalsData = generateTotalsData(latestReportData);
             const deltasData = generateDeltasData(lastReportData, latestReportData);
 
@@ -200,7 +201,7 @@ module.exports = function (lastReport) {
 
             return {
                 parsed: latestReportData,
-                raw: await stringifyPromise(latestReportData),
+                raw: rawReportData,
                 parsedNoLocation: [
                     coreTableHeaders,
                     ...getColumns(latestReportData, coreTableHeaders)
