@@ -1,9 +1,10 @@
 <main>
-    <a
-        class="covid19-latest-report-link"
-        href="/api/latest-report"
-        download="covid19-latest-report.json"
-        rel="nofollow">Download latest report</a>
+    <div>
+        <a
+            href="/api/latest-report"
+            download="covid19-latest-report.json"
+            rel="nofollow">Download latest report</a>
+    </div>
     <div class="covid19-data">
         <%- include('table.ejs', { tableData: totalsReport }); %>
         <div class="covid19-primary-data-container">
