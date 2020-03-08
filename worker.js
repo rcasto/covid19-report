@@ -47,11 +47,19 @@ function getReportDate(reportName) {
 
     // correct month, 0 = January
     month--;
-    
-    // correct year, only last 2 digits
-    // year %= 100;
 
     return new Date(year, month, day);
+}
+
+function constructRowKey(province, region) {
+    return `${province}-${region}`;
+}
+
+function constructDataWithDeltaData(data, deltaData) {
+    if (deltaData > 0) {
+        return `${data} (+${deltaData})`;
+    }
+    return `${data}`;
 }
 
 function fetchAndParseReport(reportUrl) {
@@ -94,7 +102,37 @@ function generateTotalsData(reportData) {
     ];
 }
 
-module.exports = function () {
+// Computes deltas between the last report and latest report for
+// confirmed counts, death counts, and recovered counts
+function generateDeltasData(lastReportData, latestReportData) {
+    const provinceRegionToLastCountsMap = new Map();
+
+    lastReportData
+        .slice(1)
+        .forEach(lastReportRow => {
+            const [province, region, confirmedCount, deathCount, recoveredCount] = lastReportRow;
+            provinceRegionToLastCountsMap.set(constructRowKey(province, region), [confirmedCount, deathCount, recoveredCount]);
+        });
+
+    return latestReportData
+        .map(latestReportRow => {
+            const [province, region, confirmedCount, deathCount, recoveredCount] = latestReportRow;
+            const latestReportRowKey = constructRowKey(province, region);
+            if (provinceRegionToLastCountsMap.has(latestReportRowKey)) {
+                const [lastConfirmedCount, lastDeathCount, lastRecoveredCount] = provinceRegionToLastCountsMap.get(latestReportRowKey);
+                return [
+                    confirmedCount - lastConfirmedCount,
+                    deathCount - lastDeathCount,
+                    recoveredCount - lastRecoveredCount
+                ];
+            }
+            // No corresponding entry in last report
+            // deltas are treated as 0 in this case
+            return [0, 0, 0];
+        });
+}
+
+module.exports = function (lastReport) {
     return fetch(covid19DailyReportsDirectoryUrl)
         .then(response => response.json())
         .then(dailyReports =>
@@ -118,25 +156,37 @@ module.exports = function () {
         .then(fetchAndParseReport)
         .then(async parsedLatestReport => {
             const timeSeriesReport = await fetchAndParseReport(covid19ConfirmedReportsTimeSeriesUrl);
+            const lastReportData = lastReport ?
+                getColumns(lastReport.parsed, coreTableHeaders) : [];
             const latestReportData = getColumns(parsedLatestReport, coreTableHeaders);
             const timeSeriesData = getColumns(timeSeriesReport, timeSeriesTableHeaders);
 
             // Build lookup map for location of province/country from time series data
             // Will add this data to latest report entries
-            const provinceCountryToLocationMap = new Map();
+            const provinceRegionToLocationMap = new Map();
             timeSeriesData.forEach(timeSeriesEntry => {
-                const [province, country, lat, long] = timeSeriesEntry;
-                provinceCountryToLocationMap.set(`${province}-${country}`, [lat, long]);
+                const [province, region, lat, long] = timeSeriesEntry;
+                provinceRegionToLocationMap.set(constructRowKey(province, region), [lat, long]);
             });
 
             // Add location info (lat, long) to all latest report entries
             latestReportData.forEach(latestReportEntry => {
-                const [province, country] = latestReportEntry;
-                const location = provinceCountryToLocationMap.get(`${province}-${country}`);
+                const [province, region] = latestReportEntry;
+                const location = provinceRegionToLocationMap.get(constructRowKey(province, region));
                 latestReportEntry.push.apply(latestReportEntry, location);
             });
 
             const totalsData = generateTotalsData(latestReportData);
+            const deltasData = generateDeltasData(lastReportData, latestReportData);
+
+            // Add deltas info to latest report
+            latestReportData
+                .forEach((latestReportRow, latestReportRowIndex) => {
+                    const [deltaConfirmed, deltaDeaths, deltaRecovered] = deltasData[latestReportRowIndex];
+                    latestReportRow[2] = constructDataWithDeltaData(latestReportRow[2], deltaConfirmed);
+                    latestReportRow[3] = constructDataWithDeltaData(latestReportRow[3], deltaDeaths);
+                    latestReportRow[4] = constructDataWithDeltaData(latestReportRow[4], deltaRecovered);
+                });
 
             // Add new header row - Updated with Lat and Long
             latestReportData.unshift(coreTableHeadersWithLocation);
@@ -149,7 +199,7 @@ module.exports = function () {
                     ...getColumns(latestReportData, coreTableHeaders)
                 ],
                 totals: totalsData,
-                lastUpdateTimestamp: Date.now(),
+                lastUpdateTimestamp: 1583630701211,
             };
         });
 }
