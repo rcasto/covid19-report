@@ -3,3 +3,4 @@ app.yaml
 .gcloudignore
 config.json
 covid19-report*
+notes.md
