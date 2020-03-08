@@ -62,6 +62,10 @@ function constructDataWithDeltaData(data, deltaData) {
     return `${data}`;
 }
 
+function extractAndParseFloat(data) {
+    return parseFloat((data || '').split(' ')[0], 10);
+}
+
 function fetchAndParseReport(reportUrl) {
     return fetch(reportUrl)
         .then(response => response.json())
@@ -110,7 +114,10 @@ function generateDeltasData(lastReportData, latestReportData) {
     lastReportData
         .slice(1)
         .forEach(lastReportRow => {
-            const [province, region, confirmedCount, deathCount, recoveredCount] = lastReportRow;
+            let [province, region, confirmedCount, deathCount, recoveredCount] = lastReportRow;
+            confirmedCount = extractAndParseFloat(confirmedCount);
+            deathCount = extractAndParseFloat(deathCount);
+            recoveredCount = extractAndParseFloat(recoveredCount);
             provinceRegionToLastCountsMap.set(constructRowKey(province, region), [confirmedCount, deathCount, recoveredCount]);
         });
 
