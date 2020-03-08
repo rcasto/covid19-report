@@ -53,10 +53,12 @@
         const sortedTableData = tableData
             .slice(1)
             .sort((row1, row2) => {
+                const row1ColumnValue = parseFloat(row1[columnIndex].split(' ')[0], 10);
+                const row2ColumnValue = parseFloat(row2[columnIndex].split(' ')[0], 10);
                 if (isAscending) {
-                    return row1[columnIndex] - row2[columnIndex];
+                    return row1ColumnValue - row2ColumnValue;
                 }
-                return row2[columnIndex] - row1[columnIndex];
+                return row2ColumnValue - row1ColumnValue;
             });
         
         tableDataRows
@@ -77,9 +79,9 @@
                     parseFloat(tableRow[5], 10),
                     parseFloat(tableRow[6], 10)
                 ];
-                const distance = getDistanceFromLatLonInMiles(rowLat, rowLong, lat, long);
+                const distance = `${getDistanceFromLatLonInMiles(rowLat, rowLong, lat, long)}`;
 
-                if (typeof tableRow[7] === 'number') {
+                if (typeof tableRow[7] === 'string') {
                     tableRow[7] = distance;
                 } else {
                     tableRow.push(distance);
