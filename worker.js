@@ -156,7 +156,7 @@ module.exports = function (lastReport) {
         .then(fetchAndParseReport)
         .then(async parsedLatestReport => {
             const timeSeriesReport = await fetchAndParseReport(covid19ConfirmedReportsTimeSeriesUrl);
-            const lastReportData = lastReport ?
+            const lastReportData = (lastReport && lastReport.parsed) ?
                 getColumns(lastReport.parsed, coreTableHeaders) : [];
             const latestReportData = getColumns(parsedLatestReport, coreTableHeaders);
             const timeSeriesData = getColumns(timeSeriesReport, timeSeriesTableHeaders);
@@ -199,7 +199,7 @@ module.exports = function (lastReport) {
                     ...getColumns(latestReportData, coreTableHeaders)
                 ],
                 totals: totalsData,
-                lastUpdateTimestamp: 1583630701211,
+                lastUpdateTimestamp: Date.now(),
             };
         });
 }
