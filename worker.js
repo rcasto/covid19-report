@@ -29,6 +29,11 @@ const timeSeriesTableHeaders = [
     'Lat',
     'Long'
 ];
+const totalsTableHeaders = [
+    'Total Confirmed',
+    'Total Deaths',
+    'Total Recovered'
+];
 
 /*
     The format of the daily reports is as follows:
@@ -89,7 +94,7 @@ function getColumns(data, columns) {
             .reduce((dataCols, col) => dataCols.concat(dataRow[col]), []));
 }
 
-function generateTotalsData(reportData) {
+function generateTotalsData(lastTotalsData, reportData) {
     let totalConfirmed = 0;
     let totalDeaths = 0;
     let totalRecovered = 0;
@@ -100,8 +105,15 @@ function generateTotalsData(reportData) {
         totalRecovered += parseInt(reportDataRow[4], 10);
     });
 
+    if (lastTotalsData.length > 0) {
+        const [lastTotalConfirmed, lastTotalDeaths, lastTotalRecovered] = lastTotalsData;
+        totalConfirmed = constructDataWithDeltaData(totalConfirmed, totalConfirmed - lastTotalConfirmed);
+        totalDeaths = constructDataWithDeltaData(totalDeaths, totalDeaths - lastTotalDeaths);
+        totalRecovered = constructDataWithDeltaData(totalRecovered, totalRecovered - lastTotalRecovered);
+    }
+
     return [
-        ['Total Confirmed', 'Total Deaths', 'Total Recovered'],
+        totalsTableHeaders,
         [totalConfirmed, totalDeaths, totalRecovered]
     ];
 }
@@ -162,6 +174,8 @@ module.exports = function (lastReport) {
         .then(fetchAndParseReport)
         .then(async parsedLatestReport => {
             const timeSeriesReport = await fetchAndParseReport(covid19ConfirmedReportsTimeSeriesUrl);
+            const lastReportTotalsData = (lastReport && lastReport.totals) ?
+                getColumns(lastReport.totals, totalsTableHeaders)[0] : [];
             const lastReportData = (lastReport && lastReport.parsed) ?
                 getColumns(lastReport.parsed, coreTableHeaders) : [];
             const latestReportData = getColumns(parsedLatestReport, coreTableHeaders);
@@ -183,7 +197,7 @@ module.exports = function (lastReport) {
             });
 
             const rawReportData = await stringifyPromise(latestReportData);
-            const totalsData = generateTotalsData(latestReportData);
+            const totalsData = generateTotalsData(lastReportTotalsData, latestReportData);
             const deltasData = generateDeltasData(lastReportData, latestReportData);
 
             // Add deltas info to latest report
