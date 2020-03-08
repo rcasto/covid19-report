@@ -9,6 +9,49 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --background-color: white;
+            --font-color: black;
+
+            --table-header-background-color: whitesmoke;
+            --table-row-even-background-color: white;
+            --table-row-odd-background-color: whitesmoke;
+
+            --active-sort-background-color: whitesmoke;
+            --active-sort-font-color: royalblue;
+
+            --sort-background-color: white;
+            --sort-border-color: black;
+            --sort-font-color: black;
+
+            background-color: var(--background-color);
+            color: var(--font-color);
+        }
+
+        /* @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: rgb(34, 36, 37);
+                --font-color: rgb(209, 203, 199);
+
+                --table-header-background-color: rgb(8, 9, 9);
+                --table-row-odd-background-color: rgb(8, 9, 9);
+                --table-row-even-background-color: rgb(34, 36, 37);
+
+                --active-sort-background-color: rgb(7, 8, 8);
+                --active-sort-font-color: #80D8FF;
+
+                --sort-background-color: rgb(7, 8, 8);
+                --sort-border-color: rgb(81, 70, 67);
+                --sort-font-color: rgb(184, 174, 168);
+            }
+            a {
+                color: #80D8FF;
+            }
+            a:visited {
+                color: #B388FF;
+            }
+        } */
+
         header {
             margin: 12px 0;
         }
@@ -35,15 +78,15 @@
             margin-bottom: 0;
         }
         .covid19-data table th {
-            background-color: whitesmoke;
+            background-color: var(--table-header-background-color);
             position: sticky;
             top: 0;
         }
         .covid19-data table tr:nth-child(even) {
-            background-color: white;
+            background-color: var(--table-row-even-background-color);
         }
         .covid19-data table tr:nth-child(odd) {
-            background-color: whitesmoke;
+            background-color: var(--table-row-odd-background-color);
         }
         .covid19-data table th, .covid19-data table td {
             padding: 6px;
@@ -57,13 +100,20 @@
             margin-bottom: 3px;
         }
         .covid19-data .covid19-primary-data-container .covid19-primary-data-sorts button {
+            color: var(--sort-font-color);
+            border: 1px solid var(--sort-border-color);
+            border-right-width: 0;
+            background-color: var(--sort-background-color);
             font-size: 32px;
             width: 64px;
             opacity: 0.7;
         }
+        .covid19-data .covid19-primary-data-container .covid19-primary-data-sorts button:last-child {
+            border-right-width: 1px;
+        }
         .covid19-data .covid19-primary-data-container .covid19-primary-data-sorts button.covid19-active-sort {
-            color: blue;
-            border-color: blue;
+            color: var(--active-sort-font-color);
+            background-color: var(--active-sort-background-color);
             opacity: 1;
         }
 
