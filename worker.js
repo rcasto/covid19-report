@@ -9,7 +9,6 @@ const stringifyPromise = util.promisify(stringify);
 const csvFileRegex = /.*\.csv$/;
 const covid19BaseUrl = 'https://api.github.com/repos/CSSEGISandData/COVID-19/contents';
 const covid19DailyReportsDirectoryUrl = `${covid19BaseUrl}/csse_covid_19_data/csse_covid_19_daily_reports`;
-const covid19ConfirmedReportsTimeSeriesUrl = `${covid19BaseUrl}/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv`;
 
 const coreTableHeaders = [
     'Province/State',
@@ -20,14 +19,8 @@ const coreTableHeaders = [
 ];
 const coreTableHeadersWithLocation = [
     ...coreTableHeaders,
-    'Lat',
-    'Long'
-];
-const timeSeriesTableHeaders = [
-    'Province/State',
-    'Country/Region',
-    'Lat',
-    'Long'
+    'Latitude',
+    'Longitude'
 ];
 const totalsTableHeaders = [
     'Total Confirmed',
@@ -173,31 +166,14 @@ module.exports = function (lastReport) {
         .then(latestReport => `${covid19DailyReportsDirectoryUrl}/${latestReport}`)
         .then(fetchAndParseReport)
         .then(async parsedLatestReport => {
-            const timeSeriesReport = await fetchAndParseReport(covid19ConfirmedReportsTimeSeriesUrl);
             const lastReportTotalsData = (lastReport && lastReport.totals) ?
                 getColumns(lastReport.totals, totalsTableHeaders)[0] : [];
             const lastReportData = (lastReport && lastReport.parsed) ?
                 getColumns(lastReport.parsed, coreTableHeaders) : [];
-            const latestReportData = getColumns(parsedLatestReport, coreTableHeaders);
-            const timeSeriesData = getColumns(timeSeriesReport, timeSeriesTableHeaders);
+            const latestReportData = getColumns(parsedLatestReport, coreTableHeadersWithLocation);
             const rawReportData = await stringifyPromise(latestReportData);
             const totalsData = generateTotalsData(lastReportTotalsData, latestReportData);
             const deltasData = generateDeltasData(lastReportData, latestReportData);
-
-            // Build lookup map for location of province/country from time series data
-            // Will add this data to latest report entries
-            const provinceRegionToLocationMap = new Map();
-            timeSeriesData.forEach(timeSeriesEntry => {
-                const [province, region, lat, long] = timeSeriesEntry;
-                provinceRegionToLocationMap.set(constructRowKey(province, region), [lat, long]);
-            });
-
-            // Add location info (lat, long) to all latest report entries
-            latestReportData.forEach(latestReportEntry => {
-                const [province, region] = latestReportEntry;
-                const location = provinceRegionToLocationMap.get(constructRowKey(province, region));
-                latestReportEntry.push.apply(latestReportEntry, location);
-            });
 
             // Add deltas info to latest report
             latestReportData
@@ -208,15 +184,18 @@ module.exports = function (lastReport) {
                     latestReportRow[4] = constructDataWithDeltaData(latestReportRow[4], deltaRecovered);
                 });
 
-            // Add new header row - Updated with Lat and Long
-            latestReportData.unshift(coreTableHeadersWithLocation);
-
             return {
-                parsed: latestReportData,
+                parsed: [
+                    coreTableHeadersWithLocation,
+                    ...latestReportData
+                ],
                 raw: rawReportData,
                 parsedNoLocation: [
                     coreTableHeaders,
-                    ...getColumns(latestReportData, coreTableHeaders)
+                    ...getColumns([
+                        coreTableHeaders,
+                        ...latestReportData
+                    ], coreTableHeaders)
                 ],
                 totals: totalsData,
                 lastUpdateTimestamp: Date.now(),
