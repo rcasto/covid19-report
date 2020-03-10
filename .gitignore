@@ -4,3 +4,4 @@ app.yaml
 config.json
 covid19-report*
 notes.md
+.vscode
