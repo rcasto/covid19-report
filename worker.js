@@ -99,7 +99,11 @@ function generateTotalsData(lastTotalsData, reportData) {
     });
 
     if (lastTotalsData.length > 0) {
-        const [lastTotalConfirmed, lastTotalDeaths, lastTotalRecovered] = lastTotalsData;
+        let [lastTotalConfirmed, lastTotalDeaths, lastTotalRecovered] = lastTotalsData;
+        lastTotalConfirmed = parseInt(lastTotalConfirmed, 10);
+        lastTotalDeaths = parseInt(lastTotalDeaths, 10);
+        lastTotalRecovered = parseInt(lastTotalRecovered, 10);
+
         totalConfirmed = constructDataWithDeltaData(totalConfirmed, totalConfirmed - lastTotalConfirmed);
         totalDeaths = constructDataWithDeltaData(totalDeaths, totalDeaths - lastTotalDeaths);
         totalRecovered = constructDataWithDeltaData(totalRecovered, totalRecovered - lastTotalRecovered);
