@@ -16,8 +16,6 @@
   "dependencies": {
     "@google-cloud/storage": "^4.5.0",
     "compression": "^1.7.4",
-    "csv-parse": "^4.8.8",
-    "csv-stringify": "^5.3.6",
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-rate-limit": "^5.1.1",
