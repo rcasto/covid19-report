@@ -110,6 +110,8 @@ app.get('/api/latest-report-events', (req, res) => {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-transform',
         'Connection': 'keep-alive',
+        // https://cloud.google.com/appengine/docs/flexible/nodejs/how-requests-are-handled#disabling_buffering
+        'X-Accel-Buffering': 'no',
     });
     res.write('\n');
 });
