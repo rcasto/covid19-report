@@ -133,23 +133,23 @@
             supports it.
             https://caniuse.com/#feat=eventsource
         */
-        if (window.EventSource) {
-            const eventSource = new EventSource('/api/latest-report-events');
+        // if (window.EventSource) {
+        //     const eventSource = new EventSource('/api/latest-report-events');
 
-            eventSource.addEventListener('open',
-                () => console.log('Event source open'));
-            eventSource.addEventListener('message', event => {
-                const reportData = JSON.parse(event.data);
-                tableData = reportData.parsed;
-                updateRenderedTimestamp(reportData.lastUpdateTimestamp);
-                sortTableDataByColumn(tableData, activeSort, activeSortAscending);
-            });
-            eventSource.addEventListener('error', console.error);
+        //     eventSource.addEventListener('open',
+        //         () => console.log('Event source open'));
+        //     eventSource.addEventListener('message', event => {
+        //         const reportData = JSON.parse(event.data);
+        //         tableData = reportData.parsed;
+        //         updateRenderedTimestamp(reportData.lastUpdateTimestamp);
+        //         sortTableDataByColumn(tableData, activeSort, activeSortAscending);
+        //     });
+        //     eventSource.addEventListener('error', console.error);
 
-            window.addEventListener('beforeunload', () => {
-                eventSource.close();
-            });
-        }
+        //     window.addEventListener('beforeunload', () => {
+        //         eventSource.close();
+        //     });
+        // }
     }
 
     init();
