@@ -10,6 +10,7 @@ const serverEventsUtil = require('./lib/serverEventsUtil');
 const storage = require('./lib/storage');
 const config = require('./config.json');
 
+const isProduction = process.env.NODE_ENV === 'production';
 const port = process.env.PORT || 3000;
 const apiRateLimiter = rateLimit({
     windowMs: config.rateLimiter.windowMs,
@@ -25,7 +26,7 @@ let latestReport = {
 };
 
 // avoid logs in production, make it a no-op
-if (process.env.NODE_ENV === 'production') {
+if (isProduction) {
     console.log = () => {};
 }
 
@@ -47,8 +48,9 @@ function fetchLatestReport() {
         });
 }
 
-const pollingIntervalInMs = 5000;
+const pollingIntervalInMs = 30000;
 function pollLatestReport(req, res) {
+    let currentReportFingerprint = latestReport.lastUpdateTimestamp;
     let pollReportTimeoutId = null;
 
     // listen for the client closing the connection
@@ -59,7 +61,18 @@ function pollLatestReport(req, res) {
     });
 
     pollReportTimeoutId = setTimeout(function _pollLatestReport() {
-        res.write(serverEventsUtil.createEvent(latestReport));
+        console.log('Polling for report updates', latestReport.lastUpdateTimestamp, currentReportFingerprint);
+
+        // Attempt to only send an event to the client if the report has
+        // actually been updated
+        if (latestReport.lastUpdateTimestamp !== currentReportFingerprint) {
+            console.log('Report has since updated, sending to client');
+            currentReportFingerprint = latestReport.lastUpdateTimestamp;
+            res.write(serverEventsUtil.createEvent(latestReport));
+        } else {
+            console.log('No report updates');
+            res.write(serverEventsUtil.createCustomEvent('ping'));
+        }
 
         pollReportTimeoutId = setTimeout(_pollLatestReport, pollingIntervalInMs);
     }, pollingIntervalInMs);
@@ -93,9 +106,9 @@ app.get('/api/latest-report', async (req, res) => {
 app.get('/api/latest-report-events', (req, res) => {
     pollLatestReport(req, res);
 
-    res.writeHead(200, {
+    res.set({
         'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-transform',
+        'Cache-Control': isProduction ? 'no-cache' : 'no-transform',
         'Connection': 'keep-alive',
     });
     res.write('\n');
