@@ -29,6 +29,11 @@
         switchActiveSortButton(recoveredButton);
     });
 
+    /*
+        Enable sorting by location, if the users browser
+        supports it.
+        https://caniuse.com/#feat=geolocation
+    */
     if (navigator.geolocation) {
         locationButton.disabled = false;
 
@@ -40,6 +45,24 @@
             }, (err) => {
                 console.error(err);
             });
+        });
+    }
+
+    /*
+        Enable server sent events, if the users browser
+        supports it.
+        https://caniuse.com/#feat=eventsource
+    */
+    if (window.EventSource) {
+        const eventSource = new EventSource('/api/latest-report-events');
+
+        eventSource.addEventListener('open',
+            () => console.log('Event source open'));
+        eventSource.addEventListener('message', console.log);
+        eventSource.addEventListener('error', console.error);
+
+        window.addEventListener('beforeunload', () => {
+            eventSource.close();
         });
     }
 
