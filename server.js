@@ -108,7 +108,7 @@ app.get('/api/latest-report-events', (req, res) => {
 
     res.set({
         'Content-Type': 'text/event-stream',
-        'Cache-Control': isProduction ? 'no-cache' : 'no-transform',
+        'Cache-Control': 'no-transform',
         'Connection': 'keep-alive',
     });
     res.write('\n');
