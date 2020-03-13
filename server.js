@@ -32,7 +32,7 @@ if (isProduction) {
 
 function fetchLatestReport() {
     console.log('Fetching latest report');
-    return fetchLatestReportWorker(latestReport)
+    return fetchLatestReportWorker()
         .then(async (latestReportData) => {
             console.log('Fetched latest report');
             
@@ -108,7 +108,7 @@ app.get('/api/latest-report-events', (req, res) => {
 
     res.set({
         'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-transform',
+        'Cache-Control': 'no-cache, no-transform',
         'Connection': 'keep-alive',
         // https://cloud.google.com/appengine/docs/flexible/nodejs/how-requests-are-handled#disabling_buffering
         'X-Accel-Buffering': 'no',
@@ -126,6 +126,7 @@ app.get('/api/update-report', async (req, res) => {
         await fetchLatestReport();
         res.sendStatus(200);
     } catch (err) {
+        console.error(err);
         res.status(500).send(err);
     }
 });
