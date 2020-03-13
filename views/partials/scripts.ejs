@@ -38,8 +38,8 @@
         const sortedTableData = tableData
             .slice(1)
             .sort((row1, row2) => {
-                const row1ColumnValue = parseFloat(row1[columnIndex].split(' ')[0], 10);
-                const row2ColumnValue = parseFloat(row2[columnIndex].split(' ')[0], 10);
+                const row1ColumnValue = row1[columnIndex]
+                const row2ColumnValue = row2[columnIndex];
                 if (isAscending) {
                     return row1ColumnValue - row2ColumnValue;
                 }
