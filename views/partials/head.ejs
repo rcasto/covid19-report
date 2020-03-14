@@ -17,9 +17,6 @@
             --table-row-even-background-color: white;
             --table-row-odd-background-color: whitesmoke;
 
-            --active-sort-background-color: whitesmoke;
-            --active-sort-font-color: royalblue;
-
             --sort-background-color: white;
             --sort-border-color: black;
             --sort-font-color: black;
@@ -36,9 +33,6 @@
                 --table-header-background-color: rgb(8, 9, 9);
                 --table-row-odd-background-color: rgb(8, 9, 9);
                 --table-row-even-background-color: rgb(34, 36, 37);
-
-                --active-sort-background-color: rgb(7, 8, 8);
-                --active-sort-font-color: #80D8FF;
 
                 --sort-background-color: rgb(7, 8, 8);
                 --sort-border-color: rgb(81, 70, 67);
@@ -95,26 +89,12 @@
             display: flex;
             flex-direction: column;
         }
-        .covid19-data .covid19-primary-data-container .covid19-primary-data-sorts {
-            display: flex;
-            margin-bottom: 3px;
-        }
-        .covid19-data .covid19-primary-data-container .covid19-primary-data-sorts button {
+        .covid19-data .covid19-primary-data-container #sort-type-dropdown {
             color: var(--sort-font-color);
-            border: 1px solid var(--sort-border-color);
-            border-right-width: 0;
             background-color: var(--sort-background-color);
-            font-size: 32px;
-            width: 64px;
-            opacity: 0.7;
-        }
-        .covid19-data .covid19-primary-data-container .covid19-primary-data-sorts button:last-child {
-            border-right-width: 1px;
-        }
-        .covid19-data .covid19-primary-data-container .covid19-primary-data-sorts button.covid19-active-sort {
-            color: var(--active-sort-font-color);
-            background-color: var(--active-sort-background-color);
-            opacity: 1;
+            border: 1px solid var(--sort-border-color);
+            padding: 12px;
+            margin-bottom: 6px;
         }
 
         footer {
