@@ -9,10 +9,10 @@
         <%- include('table.ejs', { tableData: totalsReport }); %>
         <div class="covid19-primary-data-container">
             <select id="sort-type-dropdown" name="sort-type">
-                <option value="confirmedCounts" selected>Sort by count of confirmed</option>
-                <option value="deathCounts">Sort by count of deaths</option>
-                <option value="recoveredCounts">Sort by count of recoveries</option>
-                <option value="locationNearest">Sort by cases nearest you</option>
+                <option value="confirmedCounts" selected>Sort by count of confirmed reports</option>
+                <option value="deathCounts">Sort by count of reported deaths</option>
+                <option value="recoveredCounts">Sort by count of reported recoveries</option>
+                <option value="locationNearest">Sort by cases reported nearest you</option>
             </select>
             <%- include('table.ejs', { tableData: latestReport }); %>
         </div>
