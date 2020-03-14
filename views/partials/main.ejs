@@ -12,7 +12,7 @@
                 <option value="confirmedCounts" selected>Sort by confirmed case counts</option>
                 <option value="deathCounts">Sort by death counts</option>
                 <option value="recoveredCounts">Sort by recovered case counts</option>
-                <option value="locationNearest">Sort by your location</option>
+                <option value="locationNearest">Sort by cases nearest you</option>
             </select>
             <%- include('table.ejs', { tableData: latestReport }); %>
         </div>
