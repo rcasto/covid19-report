@@ -6,7 +6,6 @@ const fetchLatestReportWorker = require('./worker');
 const httpsRedirect = require('./lib/httpsRedirect');
 const wwwToNonWwwRedirect = require('./lib/wwwToNonWwwRedirect');
 const rootRedirect = require('./lib/rootRedirect');
-const serverEventsUtil = require('./lib/serverEventsUtil');
 const storage = require('./lib/storage');
 const config = require('./config.json');
 
@@ -48,36 +47,6 @@ function fetchLatestReport() {
         });
 }
 
-const pollingIntervalInMs = 30000;
-function pollLatestReport(req, res) {
-    let currentReportFingerprint = latestReport.lastUpdateTimestamp;
-    let pollReportTimeoutId = null;
-
-    // listen for the client closing the connection
-    // and cleanup the report poll in that case
-    req.on('close', () => {
-        console.log('client aborted the request');
-        clearTimeout(pollReportTimeoutId);
-    });
-
-    pollReportTimeoutId = setTimeout(function _pollLatestReport() {
-        console.log('Polling for report updates', latestReport.lastUpdateTimestamp, currentReportFingerprint);
-
-        // Attempt to only send an event to the client if the report has
-        // actually been updated
-        if (latestReport.lastUpdateTimestamp !== currentReportFingerprint) {
-            console.log('Report has since updated, sending to client');
-            currentReportFingerprint = latestReport.lastUpdateTimestamp;
-            res.write(serverEventsUtil.createEvent(latestReport));
-        } else {
-            console.log('No report updates');
-            res.write(serverEventsUtil.createCustomEvent('ping'));
-        }
-
-        pollReportTimeoutId = setTimeout(_pollLatestReport, pollingIntervalInMs);
-    }, pollingIntervalInMs);
-}
-
 app.set('view engine', 'ejs');
 app.enable('trust proxy');
 
@@ -102,18 +71,6 @@ app.get('/favicon.ico', (req, res) => {
 });
 app.get('/api/latest-report', async (req, res) => {
     res.json(latestReport.parsed);
-});
-app.get('/api/latest-report-events', (req, res) => {
-    pollLatestReport(req, res);
-
-    res.set({
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache, no-transform',
-        'Connection': 'keep-alive',
-        // https://cloud.google.com/appengine/docs/flexible/nodejs/how-requests-are-handled#disabling_buffering
-        'X-Accel-Buffering': 'no',
-    });
-    res.write('\n');
 });
 app.get('/api/update-report', async (req, res) => {
     const cronId = req.query.cronId || '';
