@@ -1,9 +1,9 @@
 <script>
     let tableData = <%-JSON.stringify(latestReportWithLocation)%>;
     let updateTimestamp = <%-JSON.stringify(lastUpdateTimestamp)%>;
-    const [totalTable, reportTable] = Array.prototype.slice.call(document.querySelectorAll('table'), 0);
+    const [totalsTable, reportTable] = Array.prototype.slice.call(document.querySelectorAll('table'), 0);
     const totalsDataRows =
-        Array.prototype.slice.call(reportTable.querySelectorAll('tr'), 1);
+        Array.prototype.slice.call(totalsTable.querySelectorAll('tr'), 1);
     const tableDataRows = 
         Array.prototype.slice.call(reportTable.querySelectorAll('tr'), 1);
     const sortTypes = {
