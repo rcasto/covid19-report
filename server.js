@@ -70,7 +70,11 @@ app.get('/favicon.ico', (req, res) => {
     res.sendStatus(204);
 });
 app.get('/api/latest-report', async (req, res) => {
-    res.json(latestReport.parsed);
+    res.json({
+        report: latestReport.parsed,
+        totals: latestReport.totals,
+        lastUpdateTimestamp: latestReport.lastUpdateTimestamp
+    });
 });
 app.get('/api/update-report', async (req, res) => {
     const cronId = req.query.cronId || '';
