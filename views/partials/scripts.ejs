@@ -1,7 +1,9 @@
 <script>
     let tableData = <%-JSON.stringify(latestReportWithLocation)%>;
-    const updateTimestamp = <%-JSON.stringify(lastUpdateTimestamp)%>;
-    const reportTable = Array.prototype.slice.call(document.querySelectorAll('table'), 0)[1];
+    let updateTimestamp = <%-JSON.stringify(lastUpdateTimestamp)%>;
+    const [totalTable, reportTable] = Array.prototype.slice.call(document.querySelectorAll('table'), 0);
+    const totalsDataRows =
+        Array.prototype.slice.call(reportTable.querySelectorAll('tr'), 1);
     const tableDataRows = 
         Array.prototype.slice.call(reportTable.querySelectorAll('tr'), 1);
     const sortTypes = {
@@ -18,34 +20,28 @@
     };
 
     const lastUpdateElem = document.querySelector('.last-update-timestamp');
-    const currentDateString = (new Date()).toDateString();
 
     const sortTypeDropdown = document.getElementById('sort-type-dropdown');
     const sortTypeDropdownOptions = document.querySelectorAll('#sort-type-dropdown option');
     let activeSort = sortTypes[sortTypeDropdownOptions[sortTypeDropdown.selectedIndex].value];
 
-    sortTypeDropdown.addEventListener('input', event => {
-        const sortType = event.target.value;
-        sortBasedOffSortType(tableData, sortTypes[sortType]);
-    });
-
     function updateRenderedTimestamp(updateTimestamp) {
         lastUpdateElem.textContent = (new Date(updateTimestamp)).toLocaleString();
     }
 
-    function sortBasedOffSortType(tableData, sortTypeColumn) {
-        if (sortTypeColumn === sortTypes.locationNearest) {
-            navigator.geolocation.getCurrentPosition((pos) => {
-                const { latitude, longitude } = pos.coords;
-                activeSort = sortTypes.locationNearest;
-                sortTableDataByLocation(tableData, latitude, longitude);
-            }, (err) => {
-                console.error(err);
+    function updateRenderedTotals(updatedTotals) {
+        updateTableData(updatedTotals.slice(1), totalsDataRows);
+    }
+
+    function updateTableData(tableData, tableDataRowElems) {
+        tableDataRowElems
+            .forEach((tableDataRow, tableDataRowIndex) => {
+                const sortedTableRow = tableData[tableDataRowIndex];
+                const tableDataRowCells = Array.prototype.slice.call(tableDataRow.querySelectorAll('td'));
+                tableDataRowCells.forEach((tableDataRowCell, tableDataRowCellIndex) => {
+                    tableDataRowCell.textContent = sortedTableRow[tableDataRowCellIndex];
+                });
             });
-        } else {
-            activeSort = sortTypeColumn;
-            sortTableDataByColumn(tableData, sortTypeColumn);
-        }
     }
 
     function sortTableDataByColumn(tableData, columnIndex, isAscending = false) {
@@ -60,14 +56,7 @@
                 return row2ColumnValue - row1ColumnValue;
             });
         
-        tableDataRows
-            .forEach((tableDataRow, tableDataRowIndex) => {
-                const sortedTableRow = sortedTableData[tableDataRowIndex];
-                const tableDataRowCells = Array.prototype.slice.call(tableDataRow.querySelectorAll('td'));
-                tableDataRowCells.forEach((tableDataRowCell, tableDataRowCellIndex) => {
-                    tableDataRowCell.textContent = sortedTableRow[tableDataRowCellIndex];
-                });
-            });
+        updateTableData(sortedTableData, tableDataRows);
     }
 
     function sortTableDataByLocation(tableData, lat, long) {
@@ -88,6 +77,21 @@
             });
 
         sortTableDataByColumn(tableData, sortTypes.locationNearest, true);
+    }
+
+    function sortBasedOffSortType(tableData, sortTypeColumn) {
+        if (sortTypeColumn === sortTypes.locationNearest) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const { latitude, longitude } = pos.coords;
+                activeSort = sortTypes.locationNearest;
+                sortTableDataByLocation(tableData, latitude, longitude);
+            }, (err) => {
+                console.error(err);
+            });
+        } else {
+            activeSort = sortTypeColumn;
+            sortTableDataByColumn(tableData, sortTypeColumn);
+        }
     }
 
     // https://stackoverflow.com/a/27943 - Haversine formula
@@ -111,7 +115,8 @@
         return fetch('/api/latest-report')
             .then(response => response.json())
             .then(latestReport => {
-                if (JSON.stringify(latestReport) === JSON.stringify(tableData)) {
+                // Use timestamp to detect if there were any changes to the report contents
+                if (latestReport.lastUpdateTimestamp === updateTimestamp) {
                     return null;
                 }
                 return latestReport;
@@ -123,7 +128,7 @@
         Re-renders view with latest updates when there are changes.
         Will retain the sort, the user was last on.
     */
-    const reportUpdatePollIntervalInMs = 2 * 60 * 1000; // 2 minutes
+    const reportUpdatePollIntervalInMs = 30000; //2 * 60 * 1000; // 2 minutes
     function initReportUpdatePoll() {
         console.log('Report update poll started');
 
@@ -136,10 +141,12 @@
                 if (latestReport) {
                     console.log('Changes detected in polled report, re-rendering');
 
-                    tableData = latestReport;
+                    tableData = latestReport.report;
+                    updateTimestamp = latestReport.lastUpdateTimestamp;
 
+                    updateRenderedTimestamp(updateTimestamp);
+                    updateRenderedTotals(latestReport.totals);
                     sortBasedOffSortType(tableData, activeSort);
-                    updateRenderedTimestamp(Date.now());
                 } else {
                     console.log('No changes in polled report');
                 }
@@ -151,7 +158,7 @@
         }, reportUpdatePollIntervalInMs);
     }
 
-    function init() {
+    function init() {        
         /*
             Enable sorting by location, only if the users browser
             supports it.
@@ -161,10 +168,15 @@
             sortTypeDropdownOptions[sortTypeOptions.locationNearest].disabled = true;
         }
 
+        sortTypeDropdown.addEventListener('input', event => {
+            const sortType = event.target.value;
+            sortBasedOffSortType(tableData, sortTypes[sortType]);
+        });
+
         updateRenderedTimestamp(updateTimestamp);
         sortBasedOffSortType(tableData, activeSort);
         initReportUpdatePoll();
     }
 
-    init();
+    window.addEventListener('load', init);
 </script>
