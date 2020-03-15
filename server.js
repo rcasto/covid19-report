@@ -70,6 +70,12 @@ app.get('/favicon.ico', (req, res) => {
     res.sendStatus(204);
 });
 app.get('/api/latest-report', async (req, res) => {
+    const lastUpdateTimestamp = parseInt(req.query.lastUpdateTimestamp, 10);
+    if (lastUpdateTimestamp === latestReport.lastUpdateTimestamp) {
+        // no change in report, so no updated report to send to client
+        res.status(204).send();
+        return;
+    }
     res.json({
         report: latestReport.parsed,
         totals: latestReport.totals,

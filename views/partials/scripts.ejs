@@ -113,14 +113,15 @@
     }
 
     function getLatestReport() {
-        return fetch('/api/latest-report')
-            .then(response => response.json())
-            .then(latestReport => {
-                // Use timestamp to detect if there were any changes to the report contents
-                if (latestReport.lastUpdateTimestamp === updateTimestamp) {
-                    return null;
+        return fetch(`/api/latest-report?lastUpdateTimestamp=${updateTimestamp}`)
+            .then(response => {
+                if (response.ok) {
+                    if (response.status === 204) {
+                        return null;
+                    }
+                    return response.json();
                 }
-                return latestReport;
+                throw new Error(`${response.status}: ${response.statusText}`);
             });
     }
 
