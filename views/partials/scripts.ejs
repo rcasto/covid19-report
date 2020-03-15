@@ -129,7 +129,7 @@
         Re-renders view with latest updates when there are changes.
         Will retain the sort, the user was last on.
     */
-    const reportUpdatePollIntervalInMs = 30000; //2 * 60 * 1000; // 2 minutes
+    const reportUpdatePollIntervalInMs = 2 * 60 * 1000; // 2 minutes
     let reportUpdateTimeoutId = null;
     function initReportUpdatePoll() {
         console.log('Report update poll started');
