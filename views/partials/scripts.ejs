@@ -20,6 +20,7 @@
     };
 
     const lastUpdateElem = document.querySelector('.last-update-timestamp');
+    const autoUpdateReportSwitchElem = document.getElementById('auto-update-report-switch');
 
     const sortTypeDropdown = document.getElementById('sort-type-dropdown');
     const sortTypeDropdownOptions = document.querySelectorAll('#sort-type-dropdown option');
@@ -129,10 +130,11 @@
         Will retain the sort, the user was last on.
     */
     const reportUpdatePollIntervalInMs = 30000; //2 * 60 * 1000; // 2 minutes
+    let reportUpdateTimeoutId = null;
     function initReportUpdatePoll() {
         console.log('Report update poll started');
 
-        setTimeout(async function _updateReport() {
+        reportUpdateTimeoutId = setTimeout(async function _updateReport() {
             console.log('Polling for latest report changes');
 
             try {
@@ -154,7 +156,7 @@
                 console.error(`Failed to update report:\n${err}`);
             }
 
-            setTimeout(_updateReport, reportUpdatePollIntervalInMs);
+            reportUpdateTimeoutId = setTimeout(_updateReport, reportUpdatePollIntervalInMs);
         }, reportUpdatePollIntervalInMs);
     }
 
@@ -172,10 +174,22 @@
             const sortType = event.target.value;
             sortBasedOffSortType(tableData, sortTypes[sortType]);
         });
+        autoUpdateReportSwitchElem.addEventListener('input', event => {
+            const isAutoUpdateReportEnabled = event.target.checked;
+            if (isAutoUpdateReportEnabled) {
+                initReportUpdatePoll();
+            } else {
+                window.clearTimeout(reportUpdateTimeoutId);
+                reportUpdateTimeoutId = null;
+            }
+        });
 
         updateRenderedTimestamp(updateTimestamp);
         sortBasedOffSortType(tableData, activeSort);
-        initReportUpdatePoll();
+
+        if (autoUpdateReportSwitchElem.checked) {
+            initReportUpdatePoll();
+        }
     }
 
     window.addEventListener('load', init);
