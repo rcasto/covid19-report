@@ -125,6 +125,28 @@
             });
     }
 
+    function requestForNotifications() {
+        // Let's check if the browser supports notifications
+        if (!('Notification' in window)) {
+            return Promise.reject();
+        }
+        // Let's check whether notification permissions have already been granted
+        if (Notification.permission === 'granted') {
+            return Promise.resolve();
+        }
+        // Otherwise, we need to ask the user for permission
+        if (Notification.permission !== 'denied') {
+            return Notification.requestPermission()
+                .then(permission => {
+                    // If the user accepts, let's create a notification
+                    if (permission !== 'granted') {
+                        throw new Error('Permission not granted');
+                    }
+                });
+        }
+        return Promise.reject();
+    }
+
     /*
         Starts poll to check for report updates.
         Re-renders view with latest updates when there are changes.
@@ -132,8 +154,14 @@
     */
     const reportUpdatePollIntervalInMs = 2 * 60 * 1000; // 2 minutes
     let reportUpdateTimeoutId = null;
+    let areNotificationsEnabled = false;
+
     function initReportUpdatePoll() {
         console.log('Report update poll started');
+
+        requestForNotifications()
+            .then(() => (areNotificationsEnabled = true))
+            .catch(() => (areNotificationsEnabled = false));
 
         reportUpdateTimeoutId = setTimeout(async function _updateReport() {
             console.log('Polling for latest report changes');
@@ -146,6 +174,19 @@
 
                     tableData = latestReport.report;
                     updateTimestamp = latestReport.lastUpdateTimestamp;
+
+                    if (areNotificationsEnabled) {
+                        const notificationBodyTokens = [];
+                        for (let i = 0; i < latestReport.totals[0].length; i++) {
+                            const totalTitle = latestReport.totals[0][i];
+                            const totalCount = latestReport.totals[1][i];
+                            notificationBodyTokens.push(`${totalTitle}: ${totalCount}`);
+                        }
+                        new Notification('New covid-19 case reports available', {
+                            body: notificationBodyTokens.join('\n'),
+                            icon: 'images/covid19.jpg',
+                        });
+                    }
 
                     updateRenderedTimestamp(updateTimestamp);
                     updateRenderedTotals(latestReport.totals);
