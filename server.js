@@ -76,11 +76,16 @@ app.get('/api/latest-report', async (req, res) => {
         res.status(204).send();
         return;
     }
-    res.json({
-        report: latestReport.parsed,
-        totals: latestReport.totals,
-        lastUpdateTimestamp: latestReport.lastUpdateTimestamp
-    });
+    res
+        .set({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET'
+        })
+        .json({
+            report: latestReport.parsed,
+            totals: latestReport.totals,
+            lastUpdateTimestamp: latestReport.lastUpdateTimestamp
+        });
 });
 app.get('/api/update-report', async (req, res) => {
     const cronId = req.query.cronId || '';
