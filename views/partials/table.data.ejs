@@ -1,7 +1,7 @@
 <% tableData.forEach(tableDataRow => { %>
     <tr>
         <% tableDataRow.forEach(tableDataCell => { %>
-            <td><%= tableDataCell %></td>
+            <td><%= tableDataCell.toLocaleString() %></td>
         <% }); %>
     </tr>
 <% }); %>

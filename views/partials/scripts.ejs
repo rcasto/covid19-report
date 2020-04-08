@@ -40,7 +40,7 @@
                 const sortedTableRow = tableData[tableDataRowIndex];
                 const tableDataRowCells = Array.prototype.slice.call(tableDataRow.querySelectorAll('td'));
                 tableDataRowCells.forEach((tableDataRowCell, tableDataRowCellIndex) => {
-                    tableDataRowCell.textContent = sortedTableRow[tableDataRowCellIndex];
+                    tableDataRowCell.textContent = sortedTableRow[tableDataRowCellIndex].toLocaleString();
                 });
             });
     }
