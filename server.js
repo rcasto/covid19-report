@@ -51,7 +51,9 @@ app.set('view engine', 'ejs');
 app.enable('trust proxy');
 
 app.use(compression());
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: false,
+}));
 app.use(httpsRedirect);
 app.use(wwwToNonWwwRedirect);
 app.use(rootRedirect);
