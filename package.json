@@ -14,7 +14,7 @@
     "npm": "8.x"
   },
   "dependencies": {
-    "@google-cloud/storage": "5.18.2",
+    "@google-cloud/storage": "6.11.0",
     "compression": "1.7.4",
     "ejs": "3.1.6",
     "express": "4.17.3",
